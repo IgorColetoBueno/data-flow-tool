@@ -1,0 +1,17 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.paper {
+  padding: 20px;
+  min-width: 20rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.button {
+  margin-top: 2rem;
+}
