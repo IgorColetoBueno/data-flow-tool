@@ -1,6 +1,3 @@
-"use client";
-import { Box } from "@mui/material";
-
-const Loading = () => <Box>Loading...</Box>;
+const Loading = () => <h1>Loading...</h1>;
 
 export default Loading;
