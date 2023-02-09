@@ -1,0 +1,18 @@
+.container {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(12, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  height: 100%;
+}
+
+.navbar {
+  grid-area: 1 / 1 / 2 / 13;
+}
+.sidebar {
+  grid-area: 2 / 1 / 13 / 3;
+}
+.content {
+  grid-area: 2 / 3 / 13 / 13;
+}

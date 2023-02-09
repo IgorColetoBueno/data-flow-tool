@@ -1,32 +1,17 @@
 "use client";
 
-import { Box, Button, Paper, Typography } from "@mui/material";
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
 import RINGS from "vanta/dist/vanta.rings.min.js";
 import * as THREE from "three";
-
-// class ExampleApp extends React.Component {
-//   constructor(props: any) {
-//     super(props)
-//     this.vantaRef = React.createRef()
-//   }
-//   componentDidMount() {
-//     this.
-//   }
-//   componentWillUnmount() {
-//     if (this.vantaEffect) this.vantaEffect.destroy()
-//   }
-//   render() {
-//     return <div className='vanta' ref={this.vantaRef}>
-//       <span> Foreground content goes here </span>
-//     </div>
-//   }
-// }
+import { useRouter } from "next/navigation";
+import classNames from "classnames";
 
 const Home = () => {
   const vantaRef = useRef<any>(null);
   const vantaEffect = useRef<any>(null);
+  const [state, setState] = useState();
+  const router = useRouter();
 
   useLayoutEffect(() => {
     vantaEffect.current = RINGS({
@@ -49,22 +34,22 @@ const Home = () => {
   }, []);
 
   return (
-    <Box ref={vantaRef} className={styles.container}>
-      <Paper className={styles.paper} elevation={3}>
-        <Typography variant="h4">Data Flow Tool</Typography>
-        <Typography variant="h6" color="text.secondary">
-          Get Started
-        </Typography>
-        <Button
-          className={styles.button}
-          variant="outlined"
-          color="success"
-          size="large"
+    <div ref={vantaRef} className={styles.container}>
+      <div className="shadow-md bg-gray-light">
+        <div
+          className={classNames(styles.paper, "bg-slate-100 rounded-md p-5")}
         >
-          New flow
-        </Button>
-      </Paper>
-    </Box>
+          <h4 className="font-sans text-2xl">Data Flow Tool</h4>
+          <h6 className="font-sans text-sm">Get Started</h6>
+          <button
+            className="py-2 px-3 bg-cyan-500 hover:bg-cyan-600 hover:shadow-cyan-600/50 text-white text-sm font-semibold rounded-md shadow-lg shadow-cyan-500/50 focus:outline-none mt-10"
+            onClick={() => router.push("/editor")}
+          >
+            New flow
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
