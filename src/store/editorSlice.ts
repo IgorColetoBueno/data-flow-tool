@@ -61,13 +61,40 @@ const slice = createSlice({
     onConnect(state, action: PayloadAction<Connection>) {
       state.edges = addEdge(action.payload, state.edges);
     },
+    addNode(state, action: PayloadAction<Node>) {
+      state.nodes.push(action.payload);
+    },
+    deleteNode(state, action: PayloadAction<string>) {
+      state.nodes.splice(state.nodes.findIndex((q) => q.id === action.payload));
+    },
+    toggleSelected(
+      state,
+      action: PayloadAction<{ nodeId: string; selected: boolean }>
+    ) {
+      state.nodes = state.nodes.map((node) => {
+        if (node.id === action.payload.nodeId) {
+          node.selected = true;
+        } else {
+          node.selected = false;
+        }
+
+        return node;
+      });
+    },
   },
 });
 
 /**
  * Exportando actions
  */
-export const { onConnect, onEdgesChange, onNodesChange } = slice.actions;
+export const {
+  onConnect,
+  onEdgesChange,
+  onNodesChange,
+  addNode,
+  toggleSelected,
+  deleteNode,
+} = slice.actions;
 
 /**
  * Exportando o reducer
