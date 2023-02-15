@@ -1,11 +1,29 @@
-import { deleteNode, toggleSelected } from "@/store/editorSlice";
+import { deleteNode, setNodeData, toggleSelected } from "@/store/editorSlice";
+import { openModal } from "@/store/modalPreviewSlice";
 import { memo, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Handle, NodeProps, Position } from "reactflow";
+import Modal from "./Modal";
 
-const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
+const InputNode = ({ selected, isConnectable, id, data }: NodeProps) => {
   const dispatch = useDispatch();
   const ref = useRef<HTMLInputElement>(null);
+
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files as FileList);
+
+    if (!files.length) {
+      return;
+    }
+
+    try {
+      const strJSON = await (files[0] as any).text();
+      const obj = JSON.parse(strJSON);
+      dispatch(setNodeData({ nodeId: id, data: { output: obj } }));
+    } catch (error) {
+      alert(JSON.stringify(error));
+    }
+  };
 
   return (
     <div className="flex items-center justify-center w-72 relative block bg-indigo-700 hover:bg-indigo-600 border-indigo-500 border rounded-md shadow-lg">
@@ -15,7 +33,7 @@ const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
             <button
               onClick={() => dispatch(deleteNode(id))}
               type="button"
-              className="text-red-700 hover:text-white border border-red-500 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
+              className="text-white border border-red-500 bg-red-600 hover:bg-red-500 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
             >
               <svg
                 className="w-3 h-3"
@@ -35,6 +53,37 @@ const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
               <span className="sr-only">Icon description</span>
             </button>
             <button
+              onClick={() =>
+                dispatch(
+                  openModal({ title: "Data Preview", data: data.output })
+                )
+              }
+              type="button"
+              className="text-white border border-cyan-500 bg-cyan-600 hover:bg-cyan-500 focus:ring-4 focus:outline-none focus:ring-cyan-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
+            >
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              <span className="sr-only">Icon description</span>
+            </button>
+            <button
               onClick={() => {
                 if (!ref.current) {
                   return;
@@ -42,7 +91,7 @@ const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
                 ref.current.value = "";
               }}
               type="button"
-              className="text-slate-500 hover:text-white border border-slate-500 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
+              className="text-white border border-slate-500 bg-slate-600 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
             >
               <svg
                 className="w-3 h-3"
@@ -75,6 +124,7 @@ const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
           ref={ref}
           type="file"
           accept=".json"
+          onChange={handleFileSelected}
           className="block w-full text-xs text-slate-50
       file:mr-4 file:py-5 file:px-2
       file:rounded-full file:border-0
@@ -84,43 +134,12 @@ const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
     "
         />
       </label>
-      {/* <label
-        onMouseEnter={() =>
-          dispatch(toggleSelected({ nodeId: id, selected: true }))
-        }
-        htmlFor="dropzone-file"
-        style={{ padding: "10px" }}
-        className="flex flex-col items-center justify-center w-full h-128 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-800 bg-indigo-700 border-gray-600 hover:border-gray-400 hover:bg-indigo-700"
-      >
-        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-          <svg
-            style={{ height: "25px" }}
-            aria-hidden="true"
-            className="w-10 text-gray-100"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-            ></path>
-          </svg>
-          <p className="my-2 px-2 text-sm text-gray-100">
-            Click here to upload
-          </p>
-        </div>
-        <input id="dropzone-file" type="file" className="hidden" />
-      </label> */}
 
       <Handle
         type="source"
         position={Position.Right}
         id="a"
-        className="h-4 w-2 -right-3 !bg-indigo-500 border-none rounded-sm"
+        className="h-4 w-2 -right-3 !bg-amber-500 border-none rounded-sm"
         isConnectable={isConnectable}
       />
     </div>

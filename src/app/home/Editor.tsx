@@ -1,5 +1,7 @@
 "use client";
 import InputNode from "@/components/InputNode";
+import Modal from "@/components/Modal";
+import ModalPreview from "@/components/ModalPreview";
 import { RootState } from "@/store";
 import { onConnect, onEdgesChange, onNodesChange } from "@/store/editorSlice";
 import { useDispatch, useSelector } from "react-redux/es/exports";
@@ -15,20 +17,25 @@ const Editor = () => {
   const dispatch = useDispatch();
 
   return (
-    <ReactFlow
-      nodes={editorState.nodes}
-      edges={editorState.edges}
-      onNodesChange={(payload) => dispatch(onNodesChange(payload))}
-      onEdgesChange={(payload) => dispatch(onEdgesChange(payload))}
-      onConnect={(payload) => dispatch(onConnect(payload))}
-      fitView
-      defaultViewport={{ x: 0, y: 0, zoom: 1.5 }}
-      nodeTypes={nodeTypes}
-    >
-      <Background />
-      <Controls />
-      <MiniMap nodeStrokeWidth={5} zoomable pannable />
-    </ReactFlow>
+    <>
+      <ReactFlow
+        className="bg-slate-700"
+        nodes={editorState.nodes}
+        edges={editorState.edges}
+        onNodesChange={(payload) => dispatch(onNodesChange(payload))}
+        onEdgesChange={(payload) => dispatch(onEdgesChange(payload))}
+        onConnect={(payload) => dispatch(onConnect(payload))}
+        fitView
+        defaultViewport={{ x: 0, y: 0, zoom: 1.5 }}
+        nodeTypes={nodeTypes}
+      >
+        <Background />
+        <Controls className="bg-sky-900 text-white" />
+        <MiniMap className="bg-sky-900" nodeStrokeWidth={5} zoomable pannable />
+      </ReactFlow>
+
+      <ModalPreview />
+    </>
   );
 };
 

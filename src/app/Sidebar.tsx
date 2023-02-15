@@ -40,7 +40,7 @@ const Sidebar = ({
         aria-label="Sidebar"
       >
         <div className="h-full px-3 py-4 overflow-y-auto bg-sky-900">
-          <h1 className="text-base font-normal text-gray-100 text-6xl mb-10">
+          <h1 className="text-base font-normal text-gray-100 !text-6xl mb-10">
             DFT
           </h1>
           <ul className="space-y-2">

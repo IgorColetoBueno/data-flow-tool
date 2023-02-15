@@ -6,6 +6,10 @@ module.exports = {
   darkMode: "media",
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      maxHeight: {
+        70: "70vh",
+      },
+    },
   },
 };

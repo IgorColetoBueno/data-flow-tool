@@ -64,6 +64,11 @@ const slice = createSlice({
     addNode(state, action: PayloadAction<Node>) {
       state.nodes.push(action.payload);
     },
+    setNodeData(state, action: PayloadAction<{ nodeId: string; data: any }>) {
+      state.nodes[
+        state.nodes.findIndex((q) => q.id === action.payload.nodeId)
+      ].data = action.payload.data;
+    },
     deleteNode(state, action: PayloadAction<string>) {
       state.nodes.splice(state.nodes.findIndex((q) => q.id === action.payload));
     },
@@ -94,6 +99,7 @@ export const {
   addNode,
   toggleSelected,
   deleteNode,
+  setNodeData,
 } = slice.actions;
 
 /**
