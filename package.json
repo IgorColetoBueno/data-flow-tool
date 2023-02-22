@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev\" \"tailwindcss --input ./src/app/global.css --output ./src/app/output.css --watch\"",
-    "build": "tailwindcss ./src/app/globals.css --output ./src/app/output.css && next build",
+    "build": "next build",
+    "dev": "next dev",
     "start": "next start",
     "lint": "next lint"
   },

@@ -19,30 +19,8 @@ type RFState = {
  * Estado inicial do slice
  */
 const initialState: RFState = {
-  edges: [
-    { id: "e1-2", source: "1", target: "2" },
-    { id: "e2-3", source: "2", target: "3" },
-  ],
-  nodes: [
-    {
-      id: "1",
-      type: "input",
-      data: { label: "Input" },
-      position: { x: 250, y: 25 },
-    },
-
-    {
-      id: "2",
-      data: { label: "Default" },
-      position: { x: 100, y: 125 },
-    },
-    {
-      id: "3",
-      type: "output",
-      data: { label: "Output" },
-      position: { x: 250, y: 250 },
-    },
-  ],
+  edges: [],
+  nodes: [],
 };
 
 /**
@@ -59,7 +37,31 @@ const slice = createSlice({
       state.edges = applyEdgeChanges(action.payload, state.edges);
     },
     onConnect(state, action: PayloadAction<Connection>) {
-      state.edges = addEdge(action.payload, state.edges);
+      state.edges = addEdge(
+        { ...action.payload, type: "removableEdge" },
+        state.edges
+      );
+    },
+    addNode(state, action: PayloadAction<Node>) {
+      state.nodes.push(action.payload);
+    },
+    deleteNode(state, action: PayloadAction<string>) {
+      const index = state.nodes.findIndex((q) => q.id === action.payload);
+      state.nodes.splice(index, 1);
+    },
+    deleteEdge(state, action: PayloadAction<string>) {
+      const index = state.edges.findIndex((q) => q.id === action.payload);
+      state.edges.splice(index, 1);
+    },
+    toggleSelected(
+      state,
+      action: PayloadAction<{ nodeId: string; selected: boolean }>
+    ) {
+      state.nodes = state.nodes.map((node) => {
+        node.selected = node.id === action.payload.nodeId;
+
+        return node;
+      });
     },
   },
 });
@@ -67,7 +69,15 @@ const slice = createSlice({
 /**
  * Exportando actions
  */
-export const { onConnect, onEdgesChange, onNodesChange } = slice.actions;
+export const {
+  onConnect,
+  onEdgesChange,
+  onNodesChange,
+  addNode,
+  toggleSelected,
+  deleteNode,
+  deleteEdge,
+} = slice.actions;
 
 /**
  * Exportando o reducer
