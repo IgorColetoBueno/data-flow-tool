@@ -2,7 +2,6 @@
 
 import classNames from "classnames";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useLayoutEffect, useRef } from "react";
 import * as THREE from "three";
 import RINGS from "vanta/dist/vanta.rings.min.js";
@@ -11,7 +10,6 @@ import styles from "./page.module.css";
 const Home = () => {
   const vantaRef = useRef<any>(null);
   const vantaEffect = useRef<any>(null);
-  const router = useRouter();
 
   useLayoutEffect(() => {
     vantaEffect.current = RINGS({
