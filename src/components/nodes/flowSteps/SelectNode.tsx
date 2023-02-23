@@ -13,6 +13,7 @@ import {
   useCallback,
   useLayoutEffect,
   useMemo,
+  useState,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getIncomers, Handle, NodeProps, Position } from "reactflow";
@@ -29,6 +30,7 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
   const nodeData = useSelector((state: RootState) =>
     state.data.nodes.find((q) => q.id === id)
   );
+  const [itemToEdit, setItemToEdit] = useState(-1);
 
   const incomer = useMemo(() => {
     if (!node) {
@@ -89,6 +91,20 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
         return clonedItem;
       }
     );
+
+    dispatch(setNodeData(newNodeData));
+  };
+
+  const handleItemNameChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const newNodeData = structuredClone(nodeData) as IDataStateNode;
+
+    newNodeData.columns[index] = {
+      ...newNodeData.columns[index],
+      newName: e.target.value,
+    };
 
     dispatch(setNodeData(newNodeData));
   };
@@ -196,7 +212,7 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
         )}
       </div>
 
-      <div className="block rounded-lg p-2 w-36 space-y-2">
+      <div className="block rounded-lg p-2 w-64 space-y-2">
         <span className="text-white text-center">Select Node</span>
 
         {!!nodeData?.output && (
@@ -206,20 +222,80 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
                 className="text-base text-gray-50"
                 key={`select-${item}-${index}-${id}`}
               >
-                <div className="flex items-center mb-4">
-                  <input
-                    id={`${item}-${index}`}
-                    type="checkbox"
-                    checked={item.checked}
-                    onChange={(e) => handleItemCheck(e, index)}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label
-                    htmlFor={`${item}-${index}`}
-                    className="ml-2 text-sm font-medium text-gray-50"
-                  >
-                    {item.newName || item.originalName}
-                  </label>
+                <div className="flex w-full items-center justify-between mb-4">
+                  <div className="flex gap-3 items-center mr-3">
+                    <input
+                      id={`${item}-${index}`}
+                      type="checkbox"
+                      checked={item.checked}
+                      onChange={(e) => handleItemCheck(e, index)}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    {itemToEdit === index && (
+                      <input
+                        type="text"
+                        className="bg-cyan-800 hover:bg-cyan-900 w-full pl-3 pr-10 py-1 border-2 border-cyan-500 rounded-md focus:outline-none focus:border-cyan-600 transition-colors"
+                        onChange={(e) => handleItemNameChange(e, index)}
+                        value={item.newName}
+                      />
+                    )}
+                    {itemToEdit !== index && (
+                      <label
+                        htmlFor={`${item}-${index}`}
+                        className="ml-2 text-sm font-medium text-gray-50"
+                      >
+                        {item.newName}
+                      </label>
+                    )}
+                  </div>
+                  {itemToEdit === index && (
+                    <button
+                      onClick={() => setItemToEdit(-1)}
+                      type="button"
+                      className="text-white border border-green-600 bg-green-700 hover:bg-green-600 focus:ring-4 focus:outline-none focus:ring-green-400 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
+                    >
+                      <svg
+                        className="w-3 h-3"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4.5 12.75l6 6 9-13.5"
+                        />
+                      </svg>
+                      <span className="sr-only">Icon description</span>
+                    </button>
+                  )}
+                  {itemToEdit !== index && (
+                    <button
+                      onClick={() => setItemToEdit(index)}
+                      type="button"
+                      className="text-white border border-blue-500 bg-blue-600 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
+                    >
+                      <svg
+                        className="w-3 h-3"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                        />
+                      </svg>
+                      <span className="sr-only">Icon description</span>
+                    </button>
+                  )}
                 </div>
               </li>
             ))}
