@@ -13,19 +13,18 @@ import {
   onNodesChange,
 } from "@/store/editorSlice";
 import { generateUUID } from "@/util/generateUUID";
-import { useCallback, useRef, useState, DragEvent, ComponentType } from "react";
+import { ComponentType, DragEvent, useCallback, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux/es/exports";
 import {
   Background,
   Controls,
   EdgeTypes,
   MiniMap,
-  NodeTypes,
+  Node,
+  NodeProps,
   ReactFlow,
   ReactFlowInstance,
   ReactFlowProvider,
-  Node,
-  NodeProps,
 } from "reactflow";
 import "reactflow/dist/style.css";
 

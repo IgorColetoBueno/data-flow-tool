@@ -7,6 +7,7 @@ import {
 } from "@/store/dataSlice";
 import { deleteNode, toggleSelected } from "@/store/editorSlice";
 import { openModal } from "@/store/modalPreviewSlice";
+import { CollectionHandler } from "@/util/collectionHandler";
 import {
   ChangeEvent,
   memo,
@@ -78,18 +79,13 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
       ...newNodeData.columns[index],
       checked: e.target.checked,
     };
-    const uncheckedColumns = newNodeData.columns.filter((q) => !q.checked);
+    const uncheckedColumns = newNodeData.columns
+      .filter((q) => !q.checked)
+      .map((col) => col.originalName);
 
-    newNodeData.output = ((incomerData as IDataStateNode).output || []).map(
-      (item) => {
-        const clonedItem = structuredClone(item);
-
-        uncheckedColumns.forEach((col) =>
-          Reflect.deleteProperty(clonedItem, col.originalName)
-        );
-
-        return clonedItem;
-      }
+    newNodeData.output = CollectionHandler.removeColumns(
+      (incomerData as IDataStateNode).output,
+      uncheckedColumns
     );
 
     dispatch(setNodeData(newNodeData));
@@ -154,7 +150,10 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
             <button
               onClick={() =>
                 dispatch(
-                  openModal({ title: "Data Preview", data: data.output })
+                  openModal({
+                    title: "Data Preview",
+                    data: nodeData as IDataStateNode,
+                  })
                 )
               }
               type="button"
@@ -212,18 +211,18 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
         )}
       </div>
 
-      <div className="block rounded-lg p-2 w-64 space-y-2">
+      <div className="block rounded-lg p-2 w-64 space-y-1">
         <span className="text-white text-center">Select Node</span>
 
         {!!nodeData?.output && (
-          <ul className="bg-cyan-800 hover:bg-cyan-700 rounded-lg p-2">
+          <ul className="bg-cyan-800 hover:bg-cyan-700 rounded-lg p-2 space-y-1">
             {nodeData.columns.map((item, index) => (
               <li
                 className="text-base text-gray-50"
                 key={`select-${item}-${index}-${id}`}
               >
-                <div className="flex w-full items-center justify-between mb-4">
-                  <div className="flex gap-3 items-center mr-3">
+                <div className="flex w-full items-center justify-between">
+                  <div className="flex items-center mr-3">
                     <input
                       id={`${item}-${index}`}
                       type="checkbox"

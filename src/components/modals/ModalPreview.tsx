@@ -13,14 +13,16 @@ const ModalPreview = ({}: IModalPreviewProps) => {
   );
   const dispatch = useDispatch();
   const dataToDisplay = useMemo(() => {
-    return data as any[];
+    return data;
   }, [data]);
-  const isArray = Array.isArray(dataToDisplay);
+  const isArray = Array.isArray(dataToDisplay?.output);
 
   const renderTable = useCallback(() => {
-    if (!dataToDisplay.length) return <p>No data to display</p>;
+    if (!dataToDisplay?.output.length) return <p>No data to display</p>;
 
-    const keys = Object.keys(dataToDisplay[0]);
+    const keys = dataToDisplay.columns
+      .filter((q) => q.checked)
+      .map((col) => col.newName);
 
     return (
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -38,7 +40,7 @@ const ModalPreview = ({}: IModalPreviewProps) => {
           </tr>
         </thead>
         <tbody>
-          {dataToDisplay.map((item, index) => (
+          {dataToDisplay.output.map((item, index) => (
             <tr
               className="border-b border-gray-200 dark:border-gray-700"
               key={`item-${index}`}
