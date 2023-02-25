@@ -7,7 +7,7 @@ export interface IDataStateNodeSort {
 
 export interface IDataStateNodeColumn {
   originalName: string;
-  newName?: string;
+  newName: string;
   checked: boolean;
 }
 
@@ -52,13 +52,16 @@ const slice = createSlice({
 
       state.nodes.splice(index);
     },
+    clearAllNodeData(state) {
+      state.nodes = [];
+    },
   },
 });
 
 /**
  * Exportando actions
  */
-export const { setNodeData, deleteNodeData } = slice.actions;
+export const { setNodeData, deleteNodeData, clearAllNodeData } = slice.actions;
 
 /**
  * Exportando o reducer

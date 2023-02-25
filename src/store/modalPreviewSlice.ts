@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { IDataStateNode } from "./dataSlice";
 
 type ModalPreviewState = {
   title: string;
-  data: any;
+  data: IDataStateNode | null;
   open?: boolean;
 };
 

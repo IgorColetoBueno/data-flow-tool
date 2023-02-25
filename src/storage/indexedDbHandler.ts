@@ -3,10 +3,11 @@ const STORE_NAME = "data_from_editor";
 export class DatabaseManager {
   private static readonly databaseName: string = "DFT_DB";
 
-  private static openDatabase(): Promise<IDBDatabase> {
+  private static openDatabase(indexedDB: IDBFactory): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
       var connection: IDBOpenDBRequest;
-      connection = window.indexedDB.open(this.databaseName, 1);
+
+      connection = indexedDB.open(this.databaseName, 1);
       connection.onupgradeneeded = function () {
         var db = connection.result;
 
@@ -28,9 +29,9 @@ export class DatabaseManager {
     });
   }
 
-  public static async save(obj: any[]) {
+  public static async save(obj: any[], indexedDB: IDBFactory) {
     return new Promise<void>(async (resolve, reject) => {
-      let db = await this.openDatabase();
+      let db = await this.openDatabase(indexedDB);
 
       let transaction: IDBTransaction = db.transaction(STORE_NAME, "readwrite");
 
@@ -50,9 +51,9 @@ export class DatabaseManager {
     });
   }
 
-  public static async getAll() {
+  public static async getAll(indexedDB: IDBFactory) {
     return new Promise<any[]>(async (resolve, reject) => {
-      let db = await this.openDatabase();
+      let db = await this.openDatabase(indexedDB);
 
       var results: Array<any> = [];
       let transaction: IDBTransaction = db.transaction(STORE_NAME, "readonly");
@@ -80,9 +81,12 @@ export class DatabaseManager {
     });
   }
 
-  public static async getLimitedItems(numberOfItems: number) {
+  public static async getLimitedItems(
+    numberOfItems: number,
+    indexedDB: IDBFactory
+  ) {
     return new Promise<any[]>(async (resolve, reject) => {
-      let db = await this.openDatabase();
+      let db = await this.openDatabase(indexedDB);
 
       var results: Array<any> = [];
       let transaction: IDBTransaction = db.transaction(STORE_NAME, "readonly");
@@ -116,9 +120,9 @@ export class DatabaseManager {
     });
   }
 
-  public static async getCount(searchIndex: string) {
+  public static async getCount(searchIndex: string, indexedDB: IDBFactory) {
     return new Promise<number>(async (resolve, reject) => {
-      let db = await this.openDatabase();
+      let db = await this.openDatabase(indexedDB);
 
       let transaction: IDBTransaction = db.transaction(STORE_NAME, "readonly");
       var store = transaction.objectStore(STORE_NAME);
@@ -136,9 +140,12 @@ export class DatabaseManager {
     });
   }
 
-  public static async getAllByIndex(search: ISearchByIndex) {
+  public static async getAllByIndex(
+    search: ISearchByIndex,
+    indexedDB: IDBFactory
+  ) {
     return new Promise<any[]>(async (resolve, reject) => {
-      let db = await this.openDatabase();
+      let db = await this.openDatabase(indexedDB);
 
       var results: Array<any> = [];
       let transaction: IDBTransaction = db.transaction(STORE_NAME, "readonly");
@@ -166,9 +173,9 @@ export class DatabaseManager {
     });
   }
 
-  public static async getOne(key: string) {
+  public static async getOne(key: string, indexedDB: IDBFactory) {
     return new Promise(async (resolve, reject) => {
-      let db = await this.openDatabase();
+      let db = await this.openDatabase(indexedDB);
       let transaction: IDBTransaction = db.transaction(STORE_NAME, "readonly");
       var store = transaction.objectStore(STORE_NAME);
       //Pega cursores do banco de dados
@@ -190,9 +197,9 @@ export class DatabaseManager {
     });
   }
 
-  public static async remove(key: string) {
+  public static async remove(key: string, indexedDB: IDBFactory) {
     return new Promise<void>(async (resolve, reject) => {
-      let db = await this.openDatabase();
+      let db = await this.openDatabase(indexedDB);
 
       let transaction: IDBTransaction = db.transaction(STORE_NAME, "readwrite");
       var store = transaction.objectStore(STORE_NAME);
@@ -214,9 +221,9 @@ export class DatabaseManager {
    * @param items specific items to delete
    * @returns A empty promise
    */
-  public static async clearAll(items?: string[]) {
+  public static async clearAll(indexedDB: IDBFactory, items?: string[]) {
     return new Promise<void>(async (resolve, reject) => {
-      let db = await this.openDatabase();
+      let db = await this.openDatabase(indexedDB);
 
       let transaction: IDBTransaction = db.transaction(STORE_NAME, "readwrite");
       var store = transaction.objectStore(STORE_NAME);
@@ -237,9 +244,9 @@ export class DatabaseManager {
     });
   }
 
-  public static async removeDatabase() {
+  public static async removeDatabase(indexedDB: IDBFactory) {
     return new Promise<void>(async (resolve, reject) => {
-      let req = window.indexedDB.deleteDatabase(this.databaseName);
+      let req = indexedDB.deleteDatabase(this.databaseName);
 
       req.onsuccess = function () {
         resolve();
