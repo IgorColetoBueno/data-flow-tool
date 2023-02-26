@@ -4,21 +4,12 @@ import { deleteNodeData, IDataStateNode, setNodeData } from "@/store/dataSlice";
 import { deleteNode, toggleSelected } from "@/store/editorSlice";
 import { openModal } from "@/store/modalPreviewSlice";
 import { CollectionHandler } from "@/util/collectionHandler";
-import {
-  memo,
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  ChangeEvent,
-  useState,
-} from "react";
+import { memo, useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getIncomers, Handle, NodeProps, Position } from "reactflow";
 
 const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
   const dispatch = useDispatch();
-  const [addDropdownOpen, setAddDropdownOpen] = useState(false);
   const {
     isComponentVisible: isDropdownComponentVisible,
     ref: dropdownRef,
@@ -252,7 +243,14 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
                 className="absolute z-50 bg-gray-800 text-gray-50 p-2 rounded-lg"
               >
                 <ul className="max-h-128 w-64 overflow-auto">
-                  {incomerData?.columns.map((col, index) => (
+                  {(
+                    incomerData?.columns.filter(
+                      (col) =>
+                        !nodeData?.sort?.some(
+                          (sort) => col?.originalName === sort?.name
+                        )
+                    ) || []
+                  ).map((col, index) => (
                     <li
                       onClick={() => addSort(col.originalName)}
                       className="hover:bg-gray-700 p-1 rounded-lg"
@@ -276,7 +274,7 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
           <ul className="bg-cyan-800 hover:bg-cyan-700 rounded-lg p-2 space-y-2">
             {nodeData?.sort.map((sortItem, index) => (
               <li
-                key={`select-${sortItem}-${index}-${id}`}
+                key={`sort-${sortItem}-${index}-${id}`}
                 className="text-base text-gray-50"
               >
                 <div className="flex w-full items-center justify-between">
