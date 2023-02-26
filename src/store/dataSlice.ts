@@ -14,7 +14,7 @@ export interface IDataStateNodeColumn {
 export interface IDataStateNode {
   id: string;
   fileName?: string;
-  output: any[];
+  output: any[] | any;
   columns: IDataStateNodeColumn[];
   sort: IDataStateNodeSort[];
   group: string[];

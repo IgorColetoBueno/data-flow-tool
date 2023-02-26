@@ -25,4 +25,14 @@ export class CollectionHandler {
       return order;
     });
   }
+
+  static group(arr: any[], fields: string[]) {
+    return arr.reduce(function (groups, item) {
+      const val = fields.map((o) => `${o}: ${item[o]}`).join(" - "); //Map and Concat all values of prop and use as key
+
+      groups[val] = groups[val] || [];
+      groups[val].push(item);
+      return groups;
+    }, {});
+  }
 }
