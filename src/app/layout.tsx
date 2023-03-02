@@ -1,6 +1,8 @@
+"use client";
+import DftProvider from "@/store/provider";
+import "./global.css";
 import Head from "./head";
 import "./layout.css";
-import "./global.css";
 
 export default function RootLayout({
   children,
@@ -10,7 +12,9 @@ export default function RootLayout({
   return (
     <html>
       <Head />
-      <body>{children}</body>
+      <body>
+        <DftProvider>{children}</DftProvider>
+      </body>
     </html>
   );
 }

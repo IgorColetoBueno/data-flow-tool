@@ -1,44 +1,31 @@
-const STORE_NAME = "data_from_editor";
+import { RootState } from "@/store";
+import {
+  BaseConnection,
+  BOARD_FROM_EDITOR_STORE_NAME,
+  EXTERNAL_KEY_BOARD_FROM_EDITOR,
+} from ".";
 
-export class DatabaseManager {
-  private static readonly databaseName: string = "DFT_DB";
+interface IBoard {
+  [EXTERNAL_KEY_BOARD_FROM_EDITOR]: string;
+  name: string;
+  board?: RootState;
+}
 
-  private static openDatabase(indexedDB: IDBFactory): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-      var connection: IDBOpenDBRequest;
-
-      connection = indexedDB.open(this.databaseName, 1);
-      connection.onupgradeneeded = function () {
-        var db = connection.result;
-
-        // Creating DDL
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.createObjectStore(STORE_NAME, {
-            autoIncrement: true,
-          });
-        }
-      };
-
-      connection.onsuccess = () => {
-        resolve(connection.result);
-      };
-
-      connection.onerror = () => {
-        reject(new Error("Connection failed"));
-      };
-    });
-  }
-
-  public static async save(obj: any[], indexedDB: IDBFactory) {
+export class BoardDbHandler {
+  public static async save(obj: IBoard, indexedDB: IDBFactory) {
     return new Promise<void>(async (resolve, reject) => {
-      let db = await this.openDatabase(indexedDB);
+      debugger;
+      let db = await BaseConnection.get(indexedDB);
 
-      let transaction: IDBTransaction = db.transaction(STORE_NAME, "readwrite");
+      let transaction: IDBTransaction = db.transaction(
+        BOARD_FROM_EDITOR_STORE_NAME,
+        "readwrite"
+      );
 
-      var store = transaction.objectStore(STORE_NAME);
+      var store = transaction.objectStore(BOARD_FROM_EDITOR_STORE_NAME);
 
       //Set data into database
-      obj.forEach((item) => store.put(item));
+      store.put(obj);
 
       transaction.oncomplete = function () {
         resolve();
@@ -52,12 +39,15 @@ export class DatabaseManager {
   }
 
   public static async getAll(indexedDB: IDBFactory) {
-    return new Promise<any[]>(async (resolve, reject) => {
-      let db = await this.openDatabase(indexedDB);
+    return new Promise<IBoard[]>(async (resolve, reject) => {
+      let db = await BaseConnection.get(indexedDB);
 
       var results: Array<any> = [];
-      let transaction: IDBTransaction = db.transaction(STORE_NAME, "readonly");
-      var store = transaction.objectStore(STORE_NAME);
+      let transaction: IDBTransaction = db.transaction(
+        BOARD_FROM_EDITOR_STORE_NAME,
+        "readonly"
+      );
+      var store = transaction.objectStore(BOARD_FROM_EDITOR_STORE_NAME);
 
       var cursor = store.openCursor() as IDBRequest;
 
@@ -85,12 +75,15 @@ export class DatabaseManager {
     numberOfItems: number,
     indexedDB: IDBFactory
   ) {
-    return new Promise<any[]>(async (resolve, reject) => {
-      let db = await this.openDatabase(indexedDB);
+    return new Promise<IBoard[]>(async (resolve, reject) => {
+      let db = await BaseConnection.get(indexedDB);
 
-      var results: Array<any> = [];
-      let transaction: IDBTransaction = db.transaction(STORE_NAME, "readonly");
-      var store = transaction.objectStore(STORE_NAME);
+      var results: Array<IBoard> = [];
+      let transaction: IDBTransaction = db.transaction(
+        BOARD_FROM_EDITOR_STORE_NAME,
+        "readonly"
+      );
+      var store = transaction.objectStore(BOARD_FROM_EDITOR_STORE_NAME);
 
       var cursor = store.openCursor() as IDBRequest;
 
@@ -122,10 +115,13 @@ export class DatabaseManager {
 
   public static async getCount(searchIndex: string, indexedDB: IDBFactory) {
     return new Promise<number>(async (resolve, reject) => {
-      let db = await this.openDatabase(indexedDB);
+      let db = await BaseConnection.get(indexedDB);
 
-      let transaction: IDBTransaction = db.transaction(STORE_NAME, "readonly");
-      var store = transaction.objectStore(STORE_NAME);
+      let transaction: IDBTransaction = db.transaction(
+        BOARD_FROM_EDITOR_STORE_NAME,
+        "readonly"
+      );
+      var store = transaction.objectStore(BOARD_FROM_EDITOR_STORE_NAME);
 
       var index = store.index(searchIndex);
       var countRequest = index.count();
@@ -144,19 +140,22 @@ export class DatabaseManager {
     search: ISearchByIndex,
     indexedDB: IDBFactory
   ) {
-    return new Promise<any[]>(async (resolve, reject) => {
-      let db = await this.openDatabase(indexedDB);
+    return new Promise<IBoard[]>(async (resolve, reject) => {
+      let db = await BaseConnection.get(indexedDB);
 
-      var results: Array<any> = [];
-      let transaction: IDBTransaction = db.transaction(STORE_NAME, "readonly");
-      var store = transaction.objectStore(STORE_NAME);
+      var results: Array<IBoard> = [];
+      let transaction: IDBTransaction = db.transaction(
+        BOARD_FROM_EDITOR_STORE_NAME,
+        "readonly"
+      );
+      var store = transaction.objectStore(BOARD_FROM_EDITOR_STORE_NAME);
       var index = store.index(String(search.index));
       var request = index.openCursor(IDBKeyRange.only(search.value));
 
       request.onsuccess = () => {
         var cursor: IDBCursorWithValue | null = request.result;
         if (cursor) {
-          results.push(cursor.value as any);
+          results.push(cursor.value as IBoard);
           cursor.continue();
         }
       };
@@ -174,14 +173,17 @@ export class DatabaseManager {
   }
 
   public static async getOne(key: string, indexedDB: IDBFactory) {
-    return new Promise(async (resolve, reject) => {
-      let db = await this.openDatabase(indexedDB);
-      let transaction: IDBTransaction = db.transaction(STORE_NAME, "readonly");
-      var store = transaction.objectStore(STORE_NAME);
+    return new Promise<IBoard>(async (resolve, reject) => {
+      let db = await BaseConnection.get(indexedDB);
+      let transaction: IDBTransaction = db.transaction(
+        BOARD_FROM_EDITOR_STORE_NAME,
+        "readonly"
+      );
+      var store = transaction.objectStore(BOARD_FROM_EDITOR_STORE_NAME);
       //Pega cursores do banco de dados
       var request = store.get(key) as IDBRequest;
       request.onsuccess = () => {
-        var value = request.result;
+        var value: IBoard = request.result;
         if (value) {
           resolve(value);
         }
@@ -199,10 +201,13 @@ export class DatabaseManager {
 
   public static async remove(key: string, indexedDB: IDBFactory) {
     return new Promise<void>(async (resolve, reject) => {
-      let db = await this.openDatabase(indexedDB);
+      let db = await BaseConnection.get(indexedDB);
 
-      let transaction: IDBTransaction = db.transaction(STORE_NAME, "readwrite");
-      var store = transaction.objectStore(STORE_NAME);
+      let transaction: IDBTransaction = db.transaction(
+        BOARD_FROM_EDITOR_STORE_NAME,
+        "readwrite"
+      );
+      var store = transaction.objectStore(BOARD_FROM_EDITOR_STORE_NAME);
       store.delete(key);
 
       transaction.oncomplete = function () {
@@ -223,10 +228,13 @@ export class DatabaseManager {
    */
   public static async clearAll(indexedDB: IDBFactory, items?: string[]) {
     return new Promise<void>(async (resolve, reject) => {
-      let db = await this.openDatabase(indexedDB);
+      let db = await BaseConnection.get(indexedDB);
 
-      let transaction: IDBTransaction = db.transaction(STORE_NAME, "readwrite");
-      var store = transaction.objectStore(STORE_NAME);
+      let transaction: IDBTransaction = db.transaction(
+        BOARD_FROM_EDITOR_STORE_NAME,
+        "readwrite"
+      );
+      var store = transaction.objectStore(BOARD_FROM_EDITOR_STORE_NAME);
 
       if (items) {
         items.forEach((item) => store.delete(item));
@@ -245,17 +253,7 @@ export class DatabaseManager {
   }
 
   public static async removeDatabase(indexedDB: IDBFactory) {
-    return new Promise<void>(async (resolve, reject) => {
-      let req = indexedDB.deleteDatabase(this.databaseName);
-
-      req.onsuccess = function () {
-        resolve();
-      };
-
-      req.onerror = function () {
-        reject();
-      };
-    });
+    return await BaseConnection.removeDb(indexedDB);
   }
 }
 

@@ -1,8 +1,6 @@
-import { DatabaseManager } from "@/storage/indexedDbHandler";
 import { RootState } from "@/store";
 import {
   clearAllNodeData,
-  deleteNodeData,
   IDataStateNode,
   setNodeData,
 } from "@/store/dataSlice";
@@ -11,7 +9,7 @@ import { openModal } from "@/store/modalPreviewSlice";
 import { memo, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Handle, NodeProps, Position } from "reactflow";
-import { IDataWorkerMessage, IWorkerData } from "../../workers/input.worker";
+import { IDataWorkerMessage } from "../../workers/input.worker";
 
 const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
   const dispatch = useDispatch();

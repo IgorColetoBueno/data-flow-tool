@@ -1,4 +1,5 @@
-import { DatabaseManager } from "@/storage/indexedDbHandler";
+import { EXTERNAL_KEY_BOARD_FROM_EDITOR } from "@/storage";
+import { DataDbHandler } from "@/storage/dataDbHandler";
 
 export interface IDataWorkerMessage {
   type: string;
@@ -8,6 +9,7 @@ export interface IDataWorkerMessage {
 
 export interface IWorkerData {
   file: File;
+  key: string;
 }
 
 onmessage = async ({ data }: MessageEvent<IWorkerData>): Promise<void> => {
@@ -17,8 +19,18 @@ onmessage = async ({ data }: MessageEvent<IWorkerData>): Promise<void> => {
   if (!obj.length) return;
 
   try {
-    await DatabaseManager.removeDatabase(indexedDB);
-    await DatabaseManager.save(obj, indexedDB);
+    debugger;
+    await DataDbHandler.removeByIndex(
+      { index: EXTERNAL_KEY_BOARD_FROM_EDITOR, value: data.key },
+      indexedDB
+    );
+    await DataDbHandler.save(
+      obj.map((obj) => ({
+        ...obj,
+        [EXTERNAL_KEY_BOARD_FROM_EDITOR]: data.key,
+      })),
+      indexedDB
+    );
     postMessage({
       type: "finished",
       payload: obj.slice(0, 29),
