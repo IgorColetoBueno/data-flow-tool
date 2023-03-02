@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from ".";
 
 export interface IDataStateNodeSort {
   name: string;
@@ -55,13 +56,16 @@ const slice = createSlice({
     clearAllNodeData(state) {
       state.nodes = [];
     },
+    resetDataSlice(state, action: PayloadAction<RootState>) {
+      state = action.payload
+    }
   },
 });
 
 /**
  * Exportando actions
  */
-export const { setNodeData, deleteNodeData, clearAllNodeData } = slice.actions;
+export const { setNodeData, deleteNodeData, clearAllNodeData, resetDataSlice } = slice.actions;
 
 /**
  * Exportando o reducer

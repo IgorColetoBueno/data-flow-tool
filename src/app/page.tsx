@@ -1,9 +1,10 @@
 "use client";
 
-import { BoardDbHandler } from "@/storage/boardDbHandler";
+import { BoardDbHandler, IBoard } from "@/storage/boardDbHandler";
 import classNames from "classnames";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { generateUUID } from "three/src/math/MathUtils";
 import RINGS from "vanta/dist/vanta.rings.min.js";
@@ -13,6 +14,7 @@ const Home = () => {
   const vantaRef = useRef<any>(null);
   const vantaEffect = useRef<any>(null);
   const router = useRouter();
+  const [boards, setBoards] = useState<IBoard[]>([])
 
   useEffect(() => {
     vantaEffect.current = RINGS({
@@ -26,6 +28,9 @@ const Home = () => {
       scale: 1.0,
       scaleMobile: 1.0,
     });
+
+    BoardDbHandler.getAll(window.indexedDB)
+    .then(result => setBoards(result))
 
     return () => {
       if (vantaEffect.current) {
@@ -64,14 +69,14 @@ const Home = () => {
           <div className="p-[20px] w-96 border-l border-gray-50">
             <span className="text-gray-50 text-2xl">Open existing board</span>
             <ul className="space-y-2 mt-3">
-              <li>
-                <a
-                  href="#"
+              {boards.map(board => <li key={`board-${board.board_from_editor_id}`}>
+                <Link
+                  href={`/home/${board.board_from_editor_id}`}
                   className="flex items-center p-2 text-md font-normal rounded-lg text-gray-50 bg-gray-600 hover:bg-gray-700 font-semibold"
                 >
-                  <span>Dashboard</span>
-                </a>
-              </li>
+                  <span>{board.name}</span>
+                </Link>
+              </li>)}
             </ul>
           </div>
         </div>

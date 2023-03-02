@@ -5,7 +5,7 @@ import {
   EXTERNAL_KEY_BOARD_FROM_EDITOR,
 } from ".";
 
-interface IBoard {
+export interface IBoard {
   [EXTERNAL_KEY_BOARD_FROM_EDITOR]: string;
   name: string;
   board?: RootState;
