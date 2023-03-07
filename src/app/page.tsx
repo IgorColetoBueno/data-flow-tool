@@ -1,6 +1,7 @@
 "use client";
 
 import { BoardDbHandler, IBoard } from "@/storage/boardDbHandler";
+import { XMarkIcon } from "@heroicons/react/24/solid";
 import classNames from "classnames";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ const Home = () => {
   const vantaRef = useRef<any>(null);
   const vantaEffect = useRef<any>(null);
   const router = useRouter();
-  const [boards, setBoards] = useState<IBoard[]>([])
+  const [boards, setBoards] = useState<IBoard[]>([]);
 
   useEffect(() => {
     vantaEffect.current = RINGS({
@@ -29,8 +30,7 @@ const Home = () => {
       scaleMobile: 1.0,
     });
 
-    BoardDbHandler.getAll(window.indexedDB)
-    .then(result => setBoards(result))
+    refreshDb();
 
     return () => {
       if (vantaEffect.current) {
@@ -39,12 +39,20 @@ const Home = () => {
     };
   }, []);
 
+  const refreshDb = () => {
+    BoardDbHandler.getAll(window.indexedDB).then((result) => setBoards(result));
+  };
+
   const newFlow = () => {
     const newId = generateUUID();
     BoardDbHandler.save(
-      { board_from_editor_id: newId, name: "" },
+      { board_from_editor_id: newId, name: "Untitled" },
       window.indexedDB
     ).then(() => router.push(`/home/${newId}`));
+  };
+
+  const deleteFlow = (key: string) => {
+    BoardDbHandler.remove(key, window.indexedDB).then(refreshDb);
   };
 
   return (
@@ -69,14 +77,26 @@ const Home = () => {
           <div className="p-[20px] w-96 border-l border-gray-50">
             <span className="text-gray-50 text-2xl">Open existing board</span>
             <ul className="space-y-2 mt-3">
-              {boards.map(board => <li key={`board-${board.board_from_editor_id}`}>
-                <Link
-                  href={`/home/${board.board_from_editor_id}`}
-                  className="flex items-center p-2 text-md font-normal rounded-lg text-gray-50 bg-gray-600 hover:bg-gray-700 font-semibold"
-                >
-                  <span>{board.name}</span>
-                </Link>
-              </li>)}
+              {boards.map((board) => (
+                <li key={`board-${board.board_from_editor_id}`}>
+                  <Link
+                    href={`/home/${board.board_from_editor_id}`}
+                    className="flex items-center p-2 text-md font-normal rounded-lg text-gray-900 bg-gray-200 hover:bg-gray-300 font-semibold flex justify-between"
+                  >
+                    <span>{board.name}</span>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        deleteFlow(board.board_from_editor_id);
+                      }}
+                      type="button"
+                      className="text-red-600 hover:text-white border border-red-500 hover:bg-red-500 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-2 text-center"
+                    >
+                      <XMarkIcon strokeWidth={3} className="w-3 h-3" />
+                    </button>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

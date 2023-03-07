@@ -133,17 +133,35 @@ export class DataDbHandler {
     indexedDB: IDBFactory
   ) {
     return new Promise<void>(async (resolve, reject) => {
-      try {
+      let db = await BaseConnection.get(indexedDB);
+
+      let transaction: IDBTransaction = db.transaction(
+        DATA_FROM_STORE_NAME,
+        "readwrite"
+      );
+      debugger;
+      var store = transaction.objectStore(DATA_FROM_STORE_NAME);
+      var index = store.index(String(search.index));
+      var request = index.openCursor(IDBKeyRange.only(search.value));
+
+      request.onsuccess = () => {
+        var cursor: IDBCursorWithValue | null = request.result;
         debugger;
-        const items = await DataDbHandler.getAllByIndex(search, indexedDB);
-        await DataDbHandler.remove(
-          items.map((item) => item.key),
-          indexedDB
-        );
+        if (cursor) {
+          store.delete(cursor.primaryKey);
+          cursor.continue();
+        }
+      };
+
+      transaction.oncomplete = () => {
         resolve();
-      } catch (error) {
-        reject(error);
-      }
+        db.close();
+      };
+
+      transaction.onerror = () => {
+        reject("Não foi possível obter os dados");
+        db.close();
+      };
     });
   }
 

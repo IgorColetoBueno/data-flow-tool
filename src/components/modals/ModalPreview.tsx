@@ -1,7 +1,7 @@
 import { RootState } from "@/store";
 import { closeModal } from "@/store/modalPreviewSlice";
 import classNames from "classnames";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from "./Modal";
 
@@ -16,6 +16,7 @@ const ModalPreview = ({}: IModalPreviewProps) => {
     return data;
   }, [data]);
   const isArray = Array.isArray(dataToDisplay?.output);
+  const reportTemplateRef = useRef<HTMLDivElement>(null);
 
   const renderTable = useCallback(() => {
     if (!dataToDisplay?.output.length) return <p>No data to display</p>;
@@ -83,6 +84,7 @@ const ModalPreview = ({}: IModalPreviewProps) => {
             <p className="text-base text-gray-50 mb-2 text-lg font-semibold">
               {groupedKey}
             </p>
+
             <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
               <thead className="text-xs text-gray-700 uppercase dark:text-gray-400">
                 <tr>
@@ -139,7 +141,10 @@ const ModalPreview = ({}: IModalPreviewProps) => {
       open={open || false}
       onClose={() => dispatch(closeModal())}
     >
-      <div className="relative max-h-70 overflow-x-auto shadow-md sm:rounded-lg">
+      <div
+        ref={reportTemplateRef}
+        className="relative max-h-70 overflow-x-auto shadow-md sm:rounded-lg"
+      >
         {!isArray && renderGroupedTable()}
         {isArray && renderTable()}
       </div>

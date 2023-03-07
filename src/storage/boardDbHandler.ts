@@ -14,7 +14,6 @@ export interface IBoard {
 export class BoardDbHandler {
   public static async save(obj: IBoard, indexedDB: IDBFactory) {
     return new Promise<void>(async (resolve, reject) => {
-      debugger;
       let db = await BaseConnection.get(indexedDB);
 
       let transaction: IDBTransaction = db.transaction(

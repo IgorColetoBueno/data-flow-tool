@@ -13,7 +13,6 @@ import {
   onNodesChange,
 } from "@/store/editorSlice";
 import { generateUUID } from "@/util/generateUUID";
-import { useRouter } from "next/navigation";
 import { ComponentType, DragEvent, useCallback, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux/es/exports";
 import {
@@ -62,7 +61,6 @@ const Editor = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance<any, any>>();
-  const router = useRouter();
 
   const onDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -121,7 +119,7 @@ const Editor = () => {
           onInit={setReactFlowInstance}
         >
           <Background />
-          <Controls className="bg-sky-900 text-white" />
+          <Controls className="bg-sky-900 fill-gray-50" />
           <MiniMap
             className="bg-sky-900"
             nodeStrokeWidth={5}

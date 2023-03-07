@@ -19,11 +19,13 @@ onmessage = async ({ data }: MessageEvent<IWorkerData>): Promise<void> => {
   if (!obj.length) return;
 
   try {
-    debugger;
-    await DataDbHandler.removeByIndex(
-      { index: EXTERNAL_KEY_BOARD_FROM_EDITOR, value: data.key },
-      indexedDB
-    );
+    if (!!data.key) {
+      await DataDbHandler.removeByIndex(
+        { index: EXTERNAL_KEY_BOARD_FROM_EDITOR, value: data.key },
+        indexedDB
+      );
+    }
+
     await DataDbHandler.save(
       obj.map((obj) => ({
         ...obj,

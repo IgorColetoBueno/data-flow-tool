@@ -1,3 +1,5 @@
+import { IDataStateNodeSort } from "@/store/dataSlice";
+
 export class CollectionHandler {
   static removeColumns(collection: any[], columnsToRemove: string[]) {
     return collection.map((item) => {
@@ -26,13 +28,27 @@ export class CollectionHandler {
     });
   }
 
-  static group(arr: any[], fields: string[]) {
-    return arr.reduce(function (groups, item) {
+  static group(arr: any[], fields: string[], sort: IDataStateNodeSort[]) {
+    const groupedData = arr.reduce(function (groups, item) {
       const val = fields.map((o) => `${o}: ${item[o]}`).join(" - "); //Map and Concat all values of prop and use as key
 
       groups[val] = groups[val] || [];
       groups[val].push(item);
       return groups;
     }, {});
+
+    const sortFormatted = sort.map((item) =>
+      item.desc ? `-${item.name}` : item.name
+    );
+
+    Object.keys(groupedData).forEach((key) => {
+      debugger;
+      groupedData[key] = CollectionHandler.sort(
+        groupedData[key],
+        sortFormatted
+      );
+    });
+
+    return groupedData;
   }
 }

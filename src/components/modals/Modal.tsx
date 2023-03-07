@@ -1,4 +1,5 @@
 import { closeModal } from "@/store/modalPreviewSlice";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import classNames from "classnames";
 import { ReactNode } from "react";
 import { useDispatch } from "react-redux";
@@ -19,12 +20,12 @@ const Modal = ({ open, title, children, onClose, footer }: IModalProps) => {
       aria-hidden="true"
       aria-modal="true"
       className={classNames(
-        "fixed z-50 w-full overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full bg-gray-900/80",
+        "fixed z-50 w-full h-full overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full bg-gray-900/80",
         { hidden: !open }
       )}
     >
       <div className="flex align-items-center w-full h-full">
-        <div className="relative mx-auto my-auto bg-white max-w-6xl rounded-lg shadow dark:bg-gray-700">
+        <div className="relative mx-auto my-auto bg-white max-w-[95vw] rounded-lg shadow dark:bg-gray-700">
           <div className="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
               {title}
@@ -37,19 +38,7 @@ const Modal = ({ open, title, children, onClose, footer }: IModalProps) => {
               type="button"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
             >
-              <svg
-                aria-hidden="true"
-                className="w-5 h-5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                ></path>
-              </svg>
+              <XMarkIcon strokeWidth={3} className="w-5 h-5" />
               <span className="sr-only">Close modal</span>
             </button>
           </div>
