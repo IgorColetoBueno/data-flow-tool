@@ -6,6 +6,7 @@
 
 .react-flow__controls-button {
   border-bottom: 1px solid #1e293b !important;
+  background: unset !important;
 }
 
 /* width */

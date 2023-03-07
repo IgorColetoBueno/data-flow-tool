@@ -119,7 +119,7 @@ const Editor = () => {
           onInit={setReactFlowInstance}
         >
           <Background />
-          <Controls className="bg-sky-900 text-white" />
+          <Controls className="bg-sky-900 fill-gray-50" />
           <MiniMap
             className="bg-sky-900"
             nodeStrokeWidth={5}

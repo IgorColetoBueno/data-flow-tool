@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroicons/react": "^2.0.16",
     "@next/font": "13.1.6",
     "@reduxjs/toolkit": "^1.9.2",
     "@types/node": "18.13.0",
@@ -29,6 +30,7 @@
     "vanta": "^0.5.24"
   },
   "devDependencies": {
+    "@types/react-redux": "^7.1.25",
     "@types/three": "^0.149.0",
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.21",

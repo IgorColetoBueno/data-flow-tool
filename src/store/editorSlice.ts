@@ -11,6 +11,7 @@ import {
 } from "reactflow";
 
 type RFState = {
+  boardId?: string;
   nodes: Node[];
   edges: Edge[];
 };
@@ -63,6 +64,11 @@ const slice = createSlice({
         return node;
       });
     },
+    resetEditorSlice(state, action: PayloadAction<RFState>) {
+      state.edges = action.payload.edges;
+      state.nodes = action.payload.nodes;
+      state.boardId = action.payload.boardId;
+    },
   },
 });
 
@@ -77,6 +83,7 @@ export const {
   toggleSelected,
   deleteNode,
   deleteEdge,
+  resetEditorSlice,
 } = slice.actions;
 
 /**
