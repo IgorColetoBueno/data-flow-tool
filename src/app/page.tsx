@@ -1,6 +1,8 @@
 "use client";
 
+import { EXTERNAL_KEY_BOARD_FROM_EDITOR } from "@/storage";
 import { BoardDbHandler, IBoard } from "@/storage/boardDbHandler";
+import { DataDbHandler } from "@/storage/dataDbHandler";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import classNames from "classnames";
 import Link from "next/link";
@@ -40,19 +42,29 @@ const Home = () => {
   }, []);
 
   const refreshDb = () => {
-    BoardDbHandler.getAll(window.indexedDB).then((result) => setBoards(result));
+    BoardDbHandler.getAll().then((result) => setBoards(result));
   };
 
   const newFlow = () => {
     const newId = generateUUID();
-    BoardDbHandler.save(
-      { board_from_editor_id: newId, name: "Untitled" },
-      window.indexedDB
-    ).then(() => router.push(`/home/${newId}`));
+    BoardDbHandler.save({ board_from_editor_id: newId, name: "Untitled" }).then(
+      () => router.push(`/home/${newId}`)
+    );
   };
 
-  const deleteFlow = (key: string) => {
-    BoardDbHandler.remove(key, window.indexedDB).then(refreshDb);
+  const deleteFlow = async (key: string) => {
+    try {
+      await Promise.all([
+        BoardDbHandler.remove(key),
+        DataDbHandler.removeByIndex({
+          value: key,
+          index: EXTERNAL_KEY_BOARD_FROM_EDITOR,
+        }),
+      ]);
+      refreshDb();
+    } catch (error) {
+      alert("An error ocurred");
+    }
   };
 
   return (

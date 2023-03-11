@@ -1,6 +1,8 @@
 import { RootState } from "@/store";
+import { IDataStateNodeColumn } from "@/store/dataSlice";
 import { closeModal } from "@/store/modalPreviewSlice";
 import classNames from "classnames";
+import { isDate } from "date-fns";
 import { useCallback, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from "./Modal";
@@ -16,14 +18,20 @@ const ModalPreview = ({}: IModalPreviewProps) => {
     return data;
   }, [data]);
   const isArray = Array.isArray(dataToDisplay?.output);
-  const reportTemplateRef = useRef<HTMLDivElement>(null);
 
+  const getValue = (item: any, key: IDataStateNodeColumn) => {
+    if (typeof item[key.originalName] === "object") {
+      if (isDate(item[key.originalName])) {
+        return (item[key.originalName] as Date).toLocaleDateString();
+      }
+      return JSON.stringify(item[key.originalName]);
+    }
+    return item[key.originalName];
+  };
   const renderTable = useCallback(() => {
     if (!dataToDisplay?.output.length) return <p>No data to display</p>;
 
-    const keys = dataToDisplay.columns
-      .filter((q) => q.checked)
-      .map((col) => col.newName);
+    const keys = dataToDisplay.columns.filter((q) => q.checked);
 
     return (
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -33,9 +41,9 @@ const ModalPreview = ({}: IModalPreviewProps) => {
               <th
                 scope="col"
                 className="px-6 py-3 bg-gray-50 dark:bg-gray-800"
-                key={key + index}
+                key={key.originalName + index}
               >
-                {key}
+                {key.newName}
               </th>
             ))}
           </tr>
@@ -54,11 +62,9 @@ const ModalPreview = ({}: IModalPreviewProps) => {
                       ? "px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800"
                       : "px-6 py-4"
                   )}
-                  key={key + index + keyIndex}
+                  key={key.originalName + index + keyIndex}
                 >
-                  {typeof item[key] === "object"
-                    ? JSON.stringify(item[key])
-                    : item[key]}
+                  {getValue(item, key)}
                 </td>
               ))}
             </tr>
@@ -73,9 +79,7 @@ const ModalPreview = ({}: IModalPreviewProps) => {
 
     if (!groupedKeys.length) return <p>No data to display</p>;
 
-    const keys = (dataToDisplay?.columns || [])
-      .filter((q) => q.checked)
-      .map((col) => col.newName);
+    const keys = (dataToDisplay?.columns || []).filter((q) => q.checked);
 
     return (
       <div className="space-y-2">
@@ -92,9 +96,9 @@ const ModalPreview = ({}: IModalPreviewProps) => {
                     <th
                       scope="col"
                       className="px-6 py-3 bg-gray-50 dark:bg-gray-800"
-                      key={key + index}
+                      key={key.originalName + index}
                     >
-                      {key}
+                      {key.newName}
                     </th>
                   ))}
                 </tr>
@@ -118,11 +122,9 @@ const ModalPreview = ({}: IModalPreviewProps) => {
                             ? "px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800"
                             : "px-6 py-4"
                         )}
-                        key={key + index + keyIndex}
+                        key={key.originalName + index + keyIndex}
                       >
-                        {typeof item[key] === "object"
-                          ? JSON.stringify(item[key])
-                          : item[key]}
+                        {getValue(item, key)}
                       </td>
                     ))}
                   </tr>
@@ -141,10 +143,7 @@ const ModalPreview = ({}: IModalPreviewProps) => {
       open={open || false}
       onClose={() => dispatch(closeModal())}
     >
-      <div
-        ref={reportTemplateRef}
-        className="relative max-h-70 overflow-x-auto shadow-md sm:rounded-lg"
-      >
+      <div className="relative max-h-70 overflow-x-auto shadow-md sm:rounded-lg">
         {!isArray && renderGroupedTable()}
         {isArray && renderTable()}
       </div>

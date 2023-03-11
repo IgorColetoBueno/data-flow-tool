@@ -5,30 +5,32 @@ import { deleteNode, toggleSelected } from "@/store/editorSlice";
 import { openModal } from "@/store/modalPreviewSlice";
 import { CollectionHandler } from "@/util/collectionHandler";
 import { ArrowUturnLeftIcon, CheckIcon } from "@heroicons/react/24/outline";
-import { XMarkIcon, EyeIcon, PencilIcon } from "@heroicons/react/24/solid";
+import { EyeIcon, PencilIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import {
   ChangeEvent,
   memo,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useState,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getIncomers, Handle, NodeProps, Position } from "reactflow";
+import {
+  getIncomers,
+  getOutgoers,
+  Handle,
+  NodeProps,
+  Position,
+} from "reactflow";
 
-interface ISortNode {
-  name: string;
-  checked: boolean;
-}
-
-const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
+const SelectNode = ({ selected, isConnectable, id }: NodeProps) => {
   const dispatch = useDispatch();
   const editor = useSelector((state: RootState) => state.editor);
+  const data = useSelector((state: RootState) => state.data);
   const node = editor.nodes.find((q) => q.id === id);
-  const nodeData = useSelector((state: RootState) =>
-    state.data.nodes.find((q) => q.id === id)
+  const nodeData = useMemo(
+    () => data.nodes.find((q) => q.id === id),
+    [data.nodes, id]
   );
   const [itemToEdit, setItemToEdit] = useState(-1);
 
@@ -44,22 +46,44 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
     state.data.nodes.find((node) => node.id === incomer?.id)
   );
 
+  const updateOutgoers = useCallback(
+    (newNodeData: IDataStateNode) => {
+      const currentNode = editor.nodes.find((q) => q.id === newNodeData.id);
+
+      const outgoers = getOutgoers(currentNode!, editor.nodes, editor.edges);
+
+      if (outgoers && !!outgoers.length) {
+        outgoers.forEach((outgoer) => {
+          const outgoerNodeData = data.nodes.find((q) => q.id === outgoer.id);
+          dispatch(
+            setNodeData({ ...outgoerNodeData!, columns: newNodeData.columns })
+          );
+
+          updateOutgoers({ ...newNodeData, id: outgoer.id });
+        });
+      }
+    },
+    [data.nodes, dispatch, editor.edges, editor.nodes]
+  );
+
   const resetData = useCallback(() => {
-    const listOfColumns = Object.keys((incomerData?.output as any[])[0]);
-    dispatch(
-      setNodeData({
-        id,
-        group: [],
-        sort: [],
-        output: incomerData?.output as any[],
-        columns: listOfColumns.map((col) => ({
-          checked: true,
-          originalName: col,
-          newName: col,
-        })),
-      })
+    const listOfColumns: string[] = Object.keys(
+      (incomerData?.output as any[])[0]
     );
-  }, [dispatch, id, incomerData?.output]);
+
+    const newNodeData: IDataStateNode = {
+      ...(incomerData as IDataStateNode),
+      id,
+      columns: listOfColumns.map((col) => ({
+        checked: true,
+        originalName: col,
+        newName: col,
+      })),
+    };
+
+    dispatch(setNodeData(newNodeData));
+    updateOutgoers(newNodeData);
+  }, [dispatch, id, incomerData, updateOutgoers]);
 
   useLayoutEffect(() => {
     if (!incomerData || !(incomerData.output as any[]).length || !!nodeData) {
@@ -88,6 +112,7 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
     );
 
     dispatch(setNodeData(newNodeData));
+    updateOutgoers(newNodeData);
   };
 
   const handleItemNameChange = (
@@ -102,6 +127,7 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
     };
 
     dispatch(setNodeData(newNodeData));
+    updateOutgoers(newNodeData);
   };
 
   return (
@@ -236,4 +262,4 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
   );
 };
 
-export default memo(SortNode);
+export default memo(SelectNode);

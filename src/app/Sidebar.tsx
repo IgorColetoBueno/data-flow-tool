@@ -1,30 +1,29 @@
 "use client";
 import TextField from "@/components/input/TextField";
 import Modal from "@/components/modals/Modal";
+import { useDebounce } from "@/hooks/useDebounce";
 import { BoardDbHandler } from "@/storage/boardDbHandler";
-import { RootState } from "@/store";
-import { resetDataSlice } from "@/store/dataSlice";
-import { resetEditorSlice } from "@/store/editorSlice";
-import { closeModal } from "@/store/modalPreviewSlice";
+import store, { RootState } from "@/store";
+import { clearAllNodeData } from "@/store/dataSlice";
 import {
   ArrowLeftOnRectangleIcon,
-  ChartPieIcon,
   CheckBadgeIcon,
   ChevronUpDownIcon,
   DocumentArrowUpIcon,
+  DocumentTextIcon,
+  PresentationChartLineIcon,
   RectangleGroupIcon,
   Square3Stack3DIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
-import { DragEvent, useState } from "react";
+import { DragEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 interface ISidebarProps {
   id: string;
 }
 
 const Sidebar = ({ id }: ISidebarProps) => {
-  const state = useSelector((state: RootState) => state);
   const [exitOpen, setExitOpen] = useState(false);
   const [savingOpen, setSavingOpen] = useState(false);
   const [boardName, setBoardName] = useState("");
@@ -32,53 +31,55 @@ const Sidebar = ({ id }: ISidebarProps) => {
     event.dataTransfer.setData("application/reactflow", nodeType);
     event.dataTransfer.effectAllowed = "move";
   };
+  const boardState = useSelector((state: RootState) => state);
+  const debouncedBoardState = useDebounce<RootState>(boardState, 500);
   const router = useRouter();
   const dispatch = useDispatch();
 
   const nodeIsIntoBoard = (type: string) =>
-    state.editor.nodes.some((q) => q.type === type);
-
-  const resetStore = async () => {
-    await dispatch(resetDataSlice({ nodes: [] }));
-    await dispatch(
-      resetEditorSlice({ edges: [], nodes: [], boardId: undefined })
-    );
-    await dispatch(closeModal());
-  };
+    boardState.editor.nodes.some((q) => q.type === type);
 
   const saveBoard = () => {
-    BoardDbHandler.save(
-      {
-        board_from_editor_id: id,
-        name: boardName,
-        board: state,
-      },
-      window.indexedDB
-    ).then(() => {
-      resetStore().then(() => router.push("/"));
+    BoardDbHandler.save({
+      board_from_editor_id: id,
+      name: boardName,
+      board: boardState,
+    }).then(() => {
+      setSavingOpen(false);
     });
   };
+
+  useEffect(() => {
+    BoardDbHandler.getOne(id).then((res) => setBoardName(res.name));
+  }, [id]);
+
+  useEffect(() => {
+    if (!!boardName) saveBoard();
+    console.log("salvo");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedBoardState]);
+
   return (
     <>
       <Modal
         footer={
-          <div className="flex items-center justify-end p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+          <div className="flex items-center justify-end p-6 space-x-2 rounded-b">
             <button
               onClick={() => setExitOpen(false)}
               data-modal-hide="defaultModal"
               type="button"
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              className="text-white border border-gray-500 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             >
               Cancel
             </button>
             <button
-              onClick={() => {
+              onClick={async () => {
+                await dispatch(clearAllNodeData());
                 router.push("/");
-                setExitOpen(false);
               }}
               data-modal-hide="defaultModal"
               type="button"
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             >
               OK
             </button>
@@ -92,22 +93,22 @@ const Sidebar = ({ id }: ISidebarProps) => {
       </Modal>
       <Modal
         footer={
-          <div className="flex items-center justify-end p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+          <div className="flex items-center justify-end p-6 space-x-2 rounded-b">
             <button
               onClick={() => {
                 setSavingOpen(false);
               }}
               data-modal-hide="defaultModal"
               type="button"
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              className="text-white border border-gray-500 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             >
               Cancel
             </button>
             <button
-              onClick={saveBoard}
+              onClick={() => saveBoard()}
               data-modal-hide="defaultModal"
               type="button"
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             >
               OK
             </button>
@@ -204,14 +205,41 @@ const Sidebar = ({ id }: ISidebarProps) => {
                 </details>
               </li>
               <li>
-                <div
-                  onDragStart={(event) => onDragStart(event, "outputNode")}
-                  draggable
-                  className="flex items-center p-2 text-base font-normal text-gray-100 rounded-lg hover:bg-sky-700"
-                >
-                  <ChartPieIcon className="w-6 h-6 text-gray-100 transition duration-75 group-hover:text-gray-100" />
-                  <span className="ml-3">New output</span>
-                </div>
+                <details open>
+                  <summary className="flex cursor-pointer items-center p-2 text-base font-normal text-gray-100 rounded-lg hover:bg-sky-700">
+                    <RectangleGroupIcon className="w-6 h-6 text-gray-100 transition duration-75 group-hover:text-gray-100" />
+                    <span className="ml-3">New output</span>
+                  </summary>
+                  <div className="text-base font-normal text-gray-100 ml-10">
+                    <ul className="space-y-2">
+                      <li>
+                        <div
+                          onDragStart={(event) =>
+                            onDragStart(event, "reportNode")
+                          }
+                          draggable
+                          className="flex items-center p-2 text-base font-normal text-gray-100 rounded-lg hover:bg-sky-700"
+                        >
+                          <DocumentTextIcon className="w-6 h-6 text-gray-100 transition duration-75 group-hover:text-gray-100" />
+                          <span className="ml-3">New report</span>
+                        </div>
+                      </li>
+
+                      <li>
+                        <div
+                          onDragStart={(event) =>
+                            onDragStart(event, "lineChartNode")
+                          }
+                          draggable
+                          className="flex items-center p-2 text-base font-normal text-gray-100 rounded-lg hover:bg-sky-700"
+                        >
+                          <PresentationChartLineIcon className="w-6 h-6 text-gray-100 transition duration-75 group-hover:text-gray-100" />
+                          <span className="ml-3">New chart line</span>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </details>
               </li>
             </ul>
           </div>
@@ -227,7 +255,9 @@ const Sidebar = ({ id }: ISidebarProps) => {
             </li>
             <li>
               <button
-                onClick={() => resetStore().then(() => router.push("/"))}
+                onClick={() => {
+                  setExitOpen(true);
+                }}
                 className="w-full flex items-center p-2 text-base font-normal text-gray-100 rounded-lg hover:bg-sky-700"
               >
                 <ArrowLeftOnRectangleIcon className="w-6 h-6 text-gray-100 transition duration-75" />
