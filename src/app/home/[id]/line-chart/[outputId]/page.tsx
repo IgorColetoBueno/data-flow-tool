@@ -210,9 +210,9 @@ const LineChart = ({ params: { id, outputId } }: ILineChartProps) => {
     BoardDbHandler.getOne(id).then(setBoard);
   }, [id]);
 
-  // if (!dataItems || !options) {
-  return <Loading />;
-  // }
+  if (!dataItems || !options) {
+    return <Loading />;
+  }
 
   return (
     <div className="w-full h-full bg-[#333333]">
