@@ -10,7 +10,6 @@ import { PrinterIcon } from "@heroicons/react/24/outline";
 import classNames from "classnames";
 import { isDate } from "date-fns";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getIncomers } from "reactflow";
 
 interface IReportProps {
   params: {
@@ -25,22 +24,10 @@ const Report = ({ params: { id, outputId } }: IReportProps) => {
   const workerRef = useRef<Worker>();
   const isArray = Array.isArray(dataItems);
 
-  const incomer = useMemo(() => {
-    if (!board?.board?.editor) return null;
-
-    return (getIncomers(
-      (board?.board?.editor.nodes || []).find((q) => q.id === outputId)!,
-      board?.board?.editor?.nodes!,
-      board?.board?.editor?.edges!
-    ) || [])[0];
-  }, [board, outputId]);
-
   const dataStateNode = useMemo(
     () =>
-      board?.board?.data.nodes.find(
-        (q) => q.id === incomer?.id
-      ) as IDataStateNode,
-    [board?.board?.data.nodes, incomer?.id]
+      board?.board?.data.nodes.find((q) => q.id === outputId) as IDataStateNode,
+    [board?.board?.data.nodes, outputId]
   );
 
   const init = useCallback(async () => {
@@ -189,10 +176,10 @@ const Report = ({ params: { id, outputId } }: IReportProps) => {
   }, []);
 
   useEffect(() => {
-    if (!board || !incomer) return;
+    if (!board) return;
 
     init();
-  }, [board, incomer, init]);
+  }, [board, init]);
 
   useEffect(() => {
     BoardDbHandler.getOne(id).then(setBoard);

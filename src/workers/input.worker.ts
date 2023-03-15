@@ -1,4 +1,4 @@
-import { BR_DATE_FORMAT, US_DATE_FORMAT } from "@/regex";
+import { BR_DATE_FORMAT, ISO_DATE_FORMAT, US_DATE_FORMAT } from "@/regex";
 import { EXTERNAL_KEY_BOARD_FROM_EDITOR } from "@/storage";
 import { DataDbHandler } from "@/storage/dataDbHandler";
 import { parse } from "date-fns";
@@ -43,6 +43,10 @@ onmessage = async ({ data }: MessageEvent<IWorkerData>): Promise<void> => {
 
         if (BR_DATE_FORMAT.test(item[key])) {
           item[key] = parse(item[key], "dd/MM/yyyy", new Date());
+        }
+
+        if (ISO_DATE_FORMAT.test(item[key])) {
+          item[key] = new Date(item[key]);
         }
       });
     });

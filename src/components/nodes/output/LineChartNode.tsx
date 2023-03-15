@@ -1,35 +1,29 @@
-import useComponentVisible from "@/hooks/useComponentIsVisible";
+import SelectField from "@/components/input/SelectField";
 import { RootState } from "@/store";
 import { deleteNodeData, IDataStateNode, setNodeData } from "@/store/dataSlice";
 import { deleteNode, toggleSelected } from "@/store/editorSlice";
-import { openModal } from "@/store/modalPreviewSlice";
-import { CollectionHandler } from "@/util/collectionHandler";
+import { EyeIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import Link from "next/link";
 import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  PlusIcon,
-} from "@heroicons/react/24/outline";
-import {
-  ArrowUturnLeftIcon,
-  EyeIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/solid";
-import { memo, useCallback, useLayoutEffect, useMemo, useRef } from "react";
+  ChangeEvent,
+  memo,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getIncomers, Handle, NodeProps, Position } from "reactflow";
 
-const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
+const LineChartNode = ({ selected, isConnectable, id }: NodeProps) => {
   const dispatch = useDispatch();
-  const {
-    isComponentVisible: isDropdownComponentVisible,
-    ref: dropdownRef,
-    setIsComponentVisible: setDropdownIsComponentVisible,
-  } = useComponentVisible(false);
   const editor = useSelector((state: RootState) => state.editor);
+  const data = useSelector((state: RootState) => state.data);
   const node = editor.nodes.find((q) => q.id === id);
-  const nodeData = useSelector((state: RootState) =>
-    state.data.nodes.find((q) => q.id === id)
+  const nodeData = useMemo(
+    () => data.nodes.find((q) => q.id === id),
+    [data.nodes, id]
   );
+
   const incomer = useMemo(() => {
     if (!node) {
       return null;
@@ -41,21 +35,27 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
   const incomerData = useSelector((state: RootState) =>
     state.data.nodes.find((node) => node.id === incomer?.id)
   );
-  const ref = useRef<HTMLInputElement>(null);
 
   const resetData = useCallback(() => {
-    if (!incomerData) return;
-
-    dispatch(
-      setNodeData({
-        ...incomerData,
-        id,
-      })
+    const listOfColumns: string[] = Object.keys(
+      (incomerData?.output as any[])[0]
     );
+
+    const newNodeData: IDataStateNode = {
+      ...(incomerData as IDataStateNode),
+      id,
+      columns: listOfColumns.map((col) => ({
+        checked: true,
+        originalName: col,
+        newName: col,
+      })),
+    };
+
+    dispatch(setNodeData(newNodeData));
   }, [dispatch, id, incomerData]);
 
   useLayoutEffect(() => {
-    if (!incomerData || !!nodeData) {
+    if (!incomerData || !(incomerData.output as any[]).length || !!nodeData) {
       return;
     }
 
@@ -64,47 +64,18 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, id, incomerData, resetData]);
 
-  const handleItemNameCheck = (desc: boolean, index: number) => {
+  const handleXAxisChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const newNodeData = structuredClone(nodeData) as IDataStateNode;
 
-    newNodeData.sort[index] = {
-      ...newNodeData.sort[index],
-      desc,
-    };
-
-    const fields = newNodeData.sort.map((col) =>
-      col.desc ? `-${col.name}` : col.name
-    );
-
-    newNodeData.output = CollectionHandler.sort(
-      nodeData?.output as any[],
-      fields
-    );
+    newNodeData.xAxisColumn = e.target.value;
 
     dispatch(setNodeData(newNodeData));
   };
 
-  const addSort = (col: string) => {
+  const handleYAxisChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const newNodeData = structuredClone(nodeData) as IDataStateNode;
 
-    newNodeData.sort.push({ name: col, desc: false });
-
-    const fields = newNodeData.sort.map((col) =>
-      col.desc ? `-${col.name}` : col.name
-    );
-
-    newNodeData.output = CollectionHandler.sort(
-      nodeData?.output as any[],
-      fields
-    );
-
-    dispatch(setNodeData(newNodeData));
-  };
-
-  const deleteSort = (col: string) => {
-    const newNodeData = structuredClone(nodeData) as IDataStateNode;
-
-    newNodeData.sort.splice(newNodeData.sort.findIndex((q) => q.name === col));
+    newNodeData.yAxisColumn = e.target.value;
 
     dispatch(setNodeData(newNodeData));
   };
@@ -125,141 +96,115 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
       />
       <div style={{ top: -40 }} className="absolute w-fit">
         {selected && (
-          <>
-            <button
-              onClick={() => {
-                dispatch(deleteNode(id));
-                dispatch(deleteNodeData(id));
-              }}
-              type="button"
-              className="text-white border border-red-500 bg-red-600 hover:bg-red-500 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
-            >
-              <XMarkIcon strokeWidth={3} className="w-3 h-3" />
-            </button>
-            <button
-              onClick={() =>
-                dispatch(
-                  openModal({
-                    title: "Data Preview",
-                    data: nodeData!,
-                  })
-                )
-              }
+          <div className="flex align-center">
+            <div>
+              <button
+                onClick={() => {
+                  dispatch(deleteNode(id));
+                  dispatch(deleteNodeData(id));
+                }}
+                type="button"
+                className="text-white border border-red-500 bg-red-600 hover:bg-red-500 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
+              >
+                <XMarkIcon strokeWidth={3} className="w-3 h-3" />
+              </button>
+            </div>
+            <Link
+              target="_blank"
+              href={`/home/${editor.boardId}/line-chart/${id}`}
               type="button"
               className="text-white border border-sky-500 bg-sky-600 hover:bg-sky-500 focus:ring-4 focus:outline-none focus:ring-sky-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
             >
               <EyeIcon className="w-3 h-3" />
-            </button>
-            {!!data?.output?.length && (
-              <button
-                onClick={() => {
-                  dispatch(
-                    setNodeData({
-                      output: [],
-                      fileName: undefined,
-                      id,
-                      columns: [],
-                      group: [],
-                      sort: [],
-                    })
-                  );
-
-                  if (!ref.current) {
-                    return;
-                  }
-                  ref.current.value = "";
-                }}
-                type="button"
-                className="text-white border border-slate-500 bg-slate-600 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
-              >
-                <ArrowUturnLeftIcon className="w-3 h-3" />
-              </button>
-            )}
-            <button
-              onClick={() => setDropdownIsComponentVisible(true)}
-              type="button"
-              className="text-white border border-teal-600 bg-teal-700 hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-400 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
-            >
-              <PlusIcon strokeWidth={3} className="w-3 h-3" />
-            </button>
-            {isDropdownComponentVisible && (
-              <div
-                ref={dropdownRef}
-                className="absolute z-50 bg-gray-800 text-gray-50 p-2 rounded-lg"
-              >
-                <ul className="max-h-128 w-64 overflow-auto">
-                  {(
-                    incomerData?.columns.filter(
-                      (col) =>
-                        !nodeData?.sort?.some(
-                          (sort) => col?.originalName === sort?.name
-                        )
-                    ) || []
-                  ).map((col, index) => (
-                    <li
-                      onClick={() => addSort(col.originalName)}
-                      className="hover:bg-gray-700 p-1 rounded-lg"
-                      key={`add-item-${col}-${index}`}
-                    >
-                      {col.newName}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </>
+            </Link>
+          </div>
         )}
       </div>
 
       <div className="block rounded-lg p-2 w-64 space-y-1">
-        <div className="relative flex justify-between">
-          <p className="text-white">Sort Node</p>
-        </div>
-        {!!nodeData?.sort.length && (
-          <ul className="bg-sky-800 hover:bg-sky-700 rounded-lg p-2 space-y-2">
-            {nodeData?.sort.map((sortItem, index) => (
+        <span className="text-white text-center">Line chart Node</span>
+
+        {!!nodeData?.output && (
+          <ul className="bg-sky-800 hover:bg-sky-700 rounded-lg p-2 space-y-1">
+            <div className="pl-3 pr-10 py-1 text-gray-50">
+              <SelectField
+                label="X axis"
+                color="sky"
+                variant={800}
+                id={`x-axis-input`}
+                onChange={handleXAxisChange}
+                value={nodeData.xAxisColumn}
+              >
+                {nodeData.columns
+                  .filter((q) => q.checked)
+                  .map((item) => (
+                    <option
+                      key={`x-axis-${item.originalName}`}
+                      value={item.originalName}
+                    >
+                      {item.newName}
+                    </option>
+                  ))}
+              </SelectField>
+              <SelectField
+                label="Y axis"
+                color="sky"
+                variant={800}
+                id={`y-axis-input`}
+                onChange={handleYAxisChange}
+                value={nodeData.yAxisColumn}
+              >
+                {nodeData.columns
+                  .filter((q) => q.checked)
+                  .map((item) => (
+                    <option
+                      key={`y-axis-${item.originalName}`}
+                      value={item.originalName}
+                    >
+                      {item.newName}
+                    </option>
+                  ))}
+              </SelectField>
+            </div>
+
+            {/* {nodeData.columns.map((item, index) => (
               <li
-                key={`sort-${sortItem}-${index}-${id}`}
                 className="text-base text-gray-50"
+                key={`select-${item.originalName}-${index}-${id}`}
               >
                 <div className="flex w-full items-center justify-between">
-                  {
-                    incomerData?.columns.find(
-                      (q) => q.originalName === sortItem.name
-                    )?.newName
-                  }
-                  <div className="space-x-2">
-                    {sortItem.desc && (
-                      <button
-                        onClick={() => handleItemNameCheck(false, index)}
-                        type="button"
-                        className="text-white border border-sky-600 bg-sky-700 hover:bg-sky-600 focus:ring-4 focus:outline-none focus:ring-sky-400 font-medium rounded-full text-sm p-1 text-center"
+                  <div className="flex items-center mr-3">
+
+                    {itemToEdit !== index && (
+                      <label
+                        htmlFor={`${item}-${index}`}
+                        className="ml-2 text-sm font-medium text-gray-50"
                       >
-                        <ChevronUpIcon className="w-3 h-3" />
-                      </button>
+                        {item.newName}
+                      </label>
                     )}
-                    {!sortItem.desc && (
-                      <button
-                        onClick={() => handleItemNameCheck(true, index)}
-                        type="button"
-                        className="text-white border border-sky-600 bg-sky-700 hover:bg-sky-600 focus:ring-4 focus:outline-none focus:ring-sky-400 font-medium rounded-full text-sm p-1 text-center"
-                      >
-                        <ChevronDownIcon className="w-3 h-3" />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        deleteSort(sortItem.name);
-                      }}
-                      type="button"
-                      className="text-white border border-red-500 bg-red-600 hover:bg-red-500 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-1 text-center"
-                    >
-                      <XMarkIcon strokeWidth={3} className="w-3 h-3" />
-                    </button>
                   </div>
+                  {itemToEdit === index && (
+                    <button
+                      onClick={() => setItemToEdit(-1)}
+                      type="button"
+                      className="text-white border border-teal-600 bg-teal-700 hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-400 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
+                    >
+                      <CheckIcon className="w-3 h-3" />
+                    </button>
+                  )}
+                  {itemToEdit !== index && (
+                    <button
+                      onClick={() => setItemToEdit(index)}
+                      type="button"
+                      className="text-white border border-blue-500 bg-blue-600 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
+                    >
+                      <PencilIcon className="w-3 h-3" />
+                    </button>
+                  )}
                 </div>
               </li>
-            ))}
+            ))} */}
           </ul>
         )}
       </div>
@@ -275,4 +220,4 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
   );
 };
 
-export default memo(SortNode);
+export default memo(LineChartNode);

@@ -19,6 +19,8 @@ export interface IDataStateNode {
   columns: IDataStateNodeColumn[];
   sort: IDataStateNodeSort[];
   group: string[];
+  xAxisColumn?: string;
+  yAxisColumn?: string;
 }
 
 interface IDataState {
