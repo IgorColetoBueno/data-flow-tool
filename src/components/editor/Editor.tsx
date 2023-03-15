@@ -4,7 +4,7 @@ import ModalPreview from "@/components/modals/ModalPreview";
 import GroupNode from "@/components/nodes/flowSteps/GroupNode";
 import SelectNode from "@/components/nodes/flowSteps/SelectNode";
 import SortNode from "@/components/nodes/flowSteps/SortNode";
-import InputNode from "@/components/nodes/InputNode";
+import InputNode from "@/components/nodes/input/InputNode";
 import { RootState } from "@/store";
 import {
   addNode,
@@ -27,13 +27,17 @@ import {
   ReactFlowProvider,
 } from "reactflow";
 import "reactflow/dist/style.css";
+import LineChartNode from "../nodes/output/LineChartNode";
+import ReportNode from "../nodes/output/ReportNode";
 
 export type DftNodeTypes =
   | "inputNode"
   | "sortNode"
   | "selectNode"
   | "groupNode"
-  | "outputNode";
+  | "outputNode"
+  | "reportNode"
+  | "lineChartNode";
 
 export interface IDftNodes {
   inputNode: ComponentType<NodeProps<any>>;
@@ -41,6 +45,8 @@ export interface IDftNodes {
   selectNode: ComponentType<NodeProps<any>>;
   groupNode: ComponentType<NodeProps<any>>;
   outputNode: ComponentType<NodeProps<any>>;
+  reportNode: ComponentType<NodeProps<any>>;
+  lineChartNode: ComponentType<NodeProps<any>>;
 }
 
 const nodeTypes: IDftNodes = {
@@ -49,6 +55,8 @@ const nodeTypes: IDftNodes = {
   selectNode: SelectNode,
   groupNode: GroupNode,
   outputNode: GroupNode,
+  reportNode: ReportNode,
+  lineChartNode: LineChartNode,
 };
 
 const edgeTypes: EdgeTypes = {

@@ -12,7 +12,10 @@ export interface IBoard {
 }
 
 export class BoardDbHandler {
-  public static async save(obj: IBoard, indexedDB: IDBFactory) {
+  public static async save(
+    obj: IBoard,
+    indexedDB: IDBFactory = window.indexedDB
+  ) {
     return new Promise<void>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
 
@@ -37,7 +40,7 @@ export class BoardDbHandler {
     });
   }
 
-  public static async getAll(indexedDB: IDBFactory) {
+  public static async getAll(indexedDB: IDBFactory = window.indexedDB) {
     return new Promise<IBoard[]>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
 
@@ -72,7 +75,7 @@ export class BoardDbHandler {
 
   public static async getLimitedItems(
     numberOfItems: number,
-    indexedDB: IDBFactory
+    indexedDB: IDBFactory = window.indexedDB
   ) {
     return new Promise<IBoard[]>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
@@ -112,7 +115,10 @@ export class BoardDbHandler {
     });
   }
 
-  public static async getCount(searchIndex: string, indexedDB: IDBFactory) {
+  public static async getCount(
+    searchIndex: string,
+    indexedDB: IDBFactory = window.indexedDB
+  ) {
     return new Promise<number>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
 
@@ -137,7 +143,7 @@ export class BoardDbHandler {
 
   public static async getAllByIndex(
     search: ISearchByIndex,
-    indexedDB: IDBFactory
+    indexedDB: IDBFactory = window.indexedDB
   ) {
     return new Promise<IBoard[]>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
@@ -171,7 +177,10 @@ export class BoardDbHandler {
     });
   }
 
-  public static async getOne(key: string, indexedDB: IDBFactory) {
+  public static async getOne(
+    key: string,
+    indexedDB: IDBFactory = window.indexedDB
+  ) {
     return new Promise<IBoard>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
       let transaction: IDBTransaction = db.transaction(
@@ -198,7 +207,10 @@ export class BoardDbHandler {
     });
   }
 
-  public static async remove(key: string, indexedDB: IDBFactory) {
+  public static async remove(
+    key: string,
+    indexedDB: IDBFactory = window.indexedDB
+  ) {
     return new Promise<void>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
 
@@ -225,7 +237,10 @@ export class BoardDbHandler {
    * @param items specific items to delete
    * @returns A empty promise
    */
-  public static async clearAll(indexedDB: IDBFactory, items?: string[]) {
+  public static async clearAll(
+    indexedDB: IDBFactory = window.indexedDB,
+    items?: string[]
+  ) {
     return new Promise<void>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
 
@@ -251,7 +266,7 @@ export class BoardDbHandler {
     });
   }
 
-  public static async removeDatabase(indexedDB: IDBFactory) {
+  public static async removeDatabase(indexedDB: IDBFactory = window.indexedDB) {
     return await BaseConnection.removeDb(indexedDB);
   }
 }

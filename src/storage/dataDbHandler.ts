@@ -1,7 +1,10 @@
 import { BaseConnection, DATA_FROM_STORE_NAME } from ".";
 
 export class DataDbHandler {
-  public static async save(obj: any | any[], indexedDB: IDBFactory) {
+  public static async save(
+    obj: any | any[],
+    indexedDB: IDBFactory = window.indexedDB
+  ) {
     return new Promise<void>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
 
@@ -30,7 +33,7 @@ export class DataDbHandler {
     });
   }
 
-  public static async getAll(indexedDB: IDBFactory) {
+  public static async getAll(indexedDB: IDBFactory = window.indexedDB) {
     return new Promise<any[]>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
 
@@ -65,7 +68,7 @@ export class DataDbHandler {
 
   public static async getLimitedItems(
     numberOfItems: number,
-    indexedDB: IDBFactory
+    indexedDB: IDBFactory = window.indexedDB
   ) {
     return new Promise<any[]>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
@@ -105,7 +108,10 @@ export class DataDbHandler {
     });
   }
 
-  public static async getCount(searchIndex: string, indexedDB: IDBFactory) {
+  public static async getCount(
+    searchIndex: string,
+    indexedDB: IDBFactory = window.indexedDB
+  ) {
     return new Promise<number>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
 
@@ -130,7 +136,7 @@ export class DataDbHandler {
 
   public static async removeByIndex(
     search: ISearchByIndex,
-    indexedDB: IDBFactory
+    indexedDB: IDBFactory = window.indexedDB
   ) {
     return new Promise<void>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
@@ -139,14 +145,14 @@ export class DataDbHandler {
         DATA_FROM_STORE_NAME,
         "readwrite"
       );
-      debugger;
+
       var store = transaction.objectStore(DATA_FROM_STORE_NAME);
       var index = store.index(String(search.index));
       var request = index.openCursor(IDBKeyRange.only(search.value));
 
       request.onsuccess = () => {
         var cursor: IDBCursorWithValue | null = request.result;
-        debugger;
+
         if (cursor) {
           store.delete(cursor.primaryKey);
           cursor.continue();
@@ -167,7 +173,7 @@ export class DataDbHandler {
 
   public static async getAllByIndex(
     search: ISearchByIndex,
-    indexedDB: IDBFactory
+    indexedDB: IDBFactory = window.indexedDB
   ) {
     return new Promise<any[]>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
@@ -201,7 +207,10 @@ export class DataDbHandler {
     });
   }
 
-  public static async getOne(key: string, indexedDB: IDBFactory) {
+  public static async getOne(
+    key: string,
+    indexedDB: IDBFactory = window.indexedDB
+  ) {
     return new Promise(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
       let transaction: IDBTransaction = db.transaction(
@@ -228,7 +237,10 @@ export class DataDbHandler {
     });
   }
 
-  public static async remove(key: string | string[], indexedDB: IDBFactory) {
+  public static async remove(
+    key: string | string[],
+    indexedDB: IDBFactory = window.indexedDB
+  ) {
     return new Promise<void>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
 
@@ -260,7 +272,10 @@ export class DataDbHandler {
    * @param items specific items to delete
    * @returns A empty promise
    */
-  public static async clearAll(indexedDB: IDBFactory, items?: string[]) {
+  public static async clearAll(
+    indexedDB: IDBFactory = window.indexedDB,
+    items?: string[]
+  ) {
     return new Promise<void>(async (resolve, reject) => {
       let db = await BaseConnection.get(indexedDB);
 
@@ -286,7 +301,7 @@ export class DataDbHandler {
     });
   }
 
-  public static async removeDatabase(indexedDB: IDBFactory) {
+  public static async removeDatabase(indexedDB: IDBFactory = window.indexedDB) {
     return await BaseConnection.removeDb(indexedDB);
   }
 }

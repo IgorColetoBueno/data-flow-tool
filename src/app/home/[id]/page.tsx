@@ -18,8 +18,7 @@ const HomePage = ({ params }: IHomePageProps) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    BoardDbHandler.getOne(params.id, window.indexedDB).then((item) => {
-      debugger;
+    BoardDbHandler.getOne(params.id).then((item) => {
       if (!item.board) {
         dispatch(
           resetEditorSlice({ boardId: params.id, edges: [], nodes: [] })

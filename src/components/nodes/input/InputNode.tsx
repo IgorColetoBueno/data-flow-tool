@@ -8,10 +8,10 @@ import {
 } from "@/store/dataSlice";
 import { deleteNode, toggleSelected } from "@/store/editorSlice";
 import { openModal } from "@/store/modalPreviewSlice";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Handle, NodeProps, Position } from "reactflow";
-import { IDataWorkerMessage, IWorkerData } from "../../workers/input.worker";
+import { getOutgoers, Handle, NodeProps, Position } from "reactflow";
+import { IDataWorkerMessage, IWorkerData } from "../../../workers/input.worker";
 import {
   EyeIcon,
   XMarkIcon,
@@ -21,6 +21,9 @@ import {
 const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const editor = useSelector((state: RootState) => state.editor);
+  const data = useSelector((state: RootState) => state.data);
+  const node = editor.nodes.find((q) => q.id === id);
   const nodeData = useSelector((state: RootState) =>
     state.data.nodes.find((q) => q.id === id)
   );
@@ -28,9 +31,24 @@ const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
   const ref = useRef<HTMLInputElement>(null);
   const workerRef = useRef<Worker>();
 
+  const updateOutgoers = useCallback(
+    (newNodeData: IDataStateNode) => {
+      const outgoers = getOutgoers(node!, editor.nodes, editor.edges);
+
+      if (outgoers && !!outgoers.length) {
+        outgoers.forEach((outgoer) => {
+          const outgoerNodeData = data.nodes.find((q) => q.id === outgoer.id);
+          dispatch(
+            setNodeData({ ...outgoerNodeData!, columns: newNodeData.columns })
+          );
+        });
+      }
+    },
+    [data.nodes, dispatch, editor.edges, editor.nodes, node]
+  );
   useEffect(() => {
     workerRef.current = new Worker(
-      new URL("../../workers/input.worker.ts", import.meta.url)
+      new URL("../../../workers/input.worker.ts", import.meta.url)
     );
 
     workerRef.current.onmessage = (event: MessageEvent<IDataWorkerMessage>) => {
@@ -41,26 +59,26 @@ const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
       }
 
       const columns = Object.keys(event.data.payload[0]);
-
-      dispatch(
-        setNodeData({
-          output: event.data.payload,
-          fileName: event.data.fileName,
-          id,
-          columns: columns.map((col) => ({
-            checked: true,
-            originalName: col,
-            newName: col,
-          })),
-          group: [],
-          sort: [],
-        })
-      );
+      const newNodeData: IDataStateNode = {
+        output: event.data.payload,
+        fileName: event.data.fileName,
+        id,
+        columns: columns.map((col) => ({
+          checked: true,
+          originalName: col,
+          newName: col,
+        })),
+        group: [],
+        sort: [],
+      };
+      dispatch(setNodeData(newNodeData));
+      updateOutgoers(newNodeData);
     };
 
     return () => {
       workerRef.current?.terminate();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, id]);
 
   const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +88,6 @@ const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
       return;
     }
 
-    debugger;
     setLoading(true);
     workerRef.current?.postMessage({
       file: files[0],
@@ -92,13 +109,10 @@ const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
               onClick={() => {
                 dispatch(deleteNode(id));
                 dispatch(clearAllNodeData());
-                DataDbHandler.removeByIndex(
-                  {
-                    index: EXTERNAL_KEY_BOARD_FROM_EDITOR,
-                    value: boardId,
-                  },
-                  window.indexedDB
-                );
+                DataDbHandler.removeByIndex({
+                  index: EXTERNAL_KEY_BOARD_FROM_EDITOR,
+                  value: boardId,
+                });
               }}
               type="button"
               className="text-white border border-red-500 bg-red-600 hover:bg-red-500 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
@@ -122,23 +136,20 @@ const InputNode = ({ selected, isConnectable, id }: NodeProps) => {
             {!!nodeData?.output?.length && (
               <button
                 onClick={() => {
-                  dispatch(
-                    setNodeData({
-                      output: [],
-                      fileName: undefined,
-                      id,
-                      columns: [],
-                      group: [],
-                      sort: [],
-                    })
-                  );
-                  DataDbHandler.removeByIndex(
-                    {
-                      index: EXTERNAL_KEY_BOARD_FROM_EDITOR,
-                      value: boardId,
-                    },
-                    window.indexedDB
-                  );
+                  const newNodeData: IDataStateNode = {
+                    output: [],
+                    fileName: undefined,
+                    id,
+                    columns: [],
+                    group: [],
+                    sort: [],
+                  };
+                  dispatch(setNodeData(newNodeData));
+                  updateOutgoers(newNodeData);
+                  DataDbHandler.removeByIndex({
+                    index: EXTERNAL_KEY_BOARD_FROM_EDITOR,
+                    value: boardId,
+                  });
 
                   if (!ref.current) {
                     return;

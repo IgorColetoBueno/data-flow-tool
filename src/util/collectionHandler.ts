@@ -42,7 +42,6 @@ export class CollectionHandler {
     );
 
     Object.keys(groupedData).forEach((key) => {
-      debugger;
       groupedData[key] = CollectionHandler.sort(
         groupedData[key],
         sortFormatted

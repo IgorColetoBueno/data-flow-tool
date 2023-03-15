@@ -1,5 +1,7 @@
+import { BR_DATE_FORMAT, ISO_DATE_FORMAT, US_DATE_FORMAT } from "@/regex";
 import { EXTERNAL_KEY_BOARD_FROM_EDITOR } from "@/storage";
 import { DataDbHandler } from "@/storage/dataDbHandler";
+import { parse } from "date-fns";
 
 export interface IDataWorkerMessage {
   type: string;
@@ -26,13 +28,30 @@ onmessage = async ({ data }: MessageEvent<IWorkerData>): Promise<void> => {
       );
     }
 
-    await DataDbHandler.save(
-      obj.map((obj) => ({
-        ...obj,
-        [EXTERNAL_KEY_BOARD_FROM_EDITOR]: data.key,
-      })),
-      indexedDB
-    );
+    const keys = Object.keys(obj[0]);
+    obj.forEach((item) => {
+      item[EXTERNAL_KEY_BOARD_FROM_EDITOR] = data.key;
+
+      keys.map((key) => {
+        if (typeof item[key] !== "string") {
+          return;
+        }
+
+        if (US_DATE_FORMAT.test(item[key])) {
+          item[key] = parse(item[key], "MM/dd/yyyy", new Date());
+        }
+
+        if (BR_DATE_FORMAT.test(item[key])) {
+          item[key] = parse(item[key], "dd/MM/yyyy", new Date());
+        }
+
+        if (ISO_DATE_FORMAT.test(item[key])) {
+          item[key] = new Date(item[key]);
+        }
+      });
+    });
+
+    await DataDbHandler.save(obj, indexedDB);
     postMessage({
       type: "finished",
       payload: obj.slice(0, 29),

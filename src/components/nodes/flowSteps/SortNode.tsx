@@ -16,15 +16,22 @@ import {
 } from "@heroicons/react/24/solid";
 import { memo, useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getIncomers, Handle, NodeProps, Position } from "reactflow";
+import {
+  getIncomers,
+  getOutgoers,
+  Handle,
+  NodeProps,
+  Position,
+} from "reactflow";
 
-const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
+const SortNode = ({ selected, isConnectable, id }: NodeProps) => {
   const dispatch = useDispatch();
   const {
     isComponentVisible: isDropdownComponentVisible,
     ref: dropdownRef,
     setIsComponentVisible: setDropdownIsComponentVisible,
   } = useComponentVisible(false);
+  const data = useSelector((state: RootState) => state.data);
   const editor = useSelector((state: RootState) => state.editor);
   const node = editor.nodes.find((q) => q.id === id);
   const nodeData = useSelector((state: RootState) =>
@@ -41,18 +48,36 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
   const incomerData = useSelector((state: RootState) =>
     state.data.nodes.find((node) => node.id === incomer?.id)
   );
-  const ref = useRef<HTMLInputElement>(null);
+
+  const updateOutgoers = useCallback(
+    (newNodeData: IDataStateNode) => {
+      const currentNode = editor.nodes.find((q) => q.id === newNodeData.id);
+
+      const outgoers = getOutgoers(currentNode!, editor.nodes, editor.edges);
+
+      if (outgoers && !!outgoers.length) {
+        outgoers.forEach((outgoer) => {
+          const outgoerNodeData = data.nodes.find((q) => q.id === outgoer.id);
+          dispatch(
+            setNodeData({ ...outgoerNodeData!, sort: newNodeData.sort })
+          );
+
+          updateOutgoers({ ...newNodeData, id: outgoer.id });
+        });
+      }
+    },
+    [data.nodes, dispatch, editor.edges, editor.nodes]
+  );
 
   const resetData = useCallback(() => {
     if (!incomerData) return;
-
-    dispatch(
-      setNodeData({
-        ...incomerData,
-        id,
-      })
-    );
-  }, [dispatch, id, incomerData]);
+    const newNodeData = {
+      ...incomerData,
+      id,
+    };
+    dispatch(setNodeData(newNodeData));
+    updateOutgoers(newNodeData);
+  }, [dispatch, id, incomerData, updateOutgoers]);
 
   useLayoutEffect(() => {
     if (!incomerData || !!nodeData) {
@@ -82,6 +107,7 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
     );
 
     dispatch(setNodeData(newNodeData));
+    updateOutgoers(newNodeData);
   };
 
   const addSort = (col: string) => {
@@ -99,6 +125,7 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
     );
 
     dispatch(setNodeData(newNodeData));
+    updateOutgoers(newNodeData);
   };
 
   const deleteSort = (col: string) => {
@@ -107,6 +134,7 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
     newNodeData.sort.splice(newNodeData.sort.findIndex((q) => q.name === col));
 
     dispatch(setNodeData(newNodeData));
+    updateOutgoers(newNodeData);
   };
 
   return (
@@ -150,31 +178,6 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
             >
               <EyeIcon className="w-3 h-3" />
             </button>
-            {!!data?.output?.length && (
-              <button
-                onClick={() => {
-                  dispatch(
-                    setNodeData({
-                      output: [],
-                      fileName: undefined,
-                      id,
-                      columns: [],
-                      group: [],
-                      sort: [],
-                    })
-                  );
-
-                  if (!ref.current) {
-                    return;
-                  }
-                  ref.current.value = "";
-                }}
-                type="button"
-                className="text-white border border-slate-500 bg-slate-600 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
-              >
-                <ArrowUturnLeftIcon className="w-3 h-3" />
-              </button>
-            )}
             <button
               onClick={() => setDropdownIsComponentVisible(true)}
               type="button"
@@ -189,7 +192,7 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
               >
                 <ul className="max-h-128 w-64 overflow-auto">
                   {(
-                    incomerData?.columns.filter(
+                    nodeData?.columns.filter(
                       (col) =>
                         !nodeData?.sort?.some(
                           (sort) => col?.originalName === sort?.name
@@ -224,7 +227,7 @@ const SortNode = ({ selected, isConnectable, id, data }: NodeProps) => {
               >
                 <div className="flex w-full items-center justify-between">
                   {
-                    incomerData?.columns.find(
+                    nodeData?.columns.find(
                       (q) => q.originalName === sortItem.name
                     )?.newName
                   }

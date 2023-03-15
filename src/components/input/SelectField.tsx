@@ -1,11 +1,11 @@
 import classNames from "classnames";
-import { DetailedHTMLProps, InputHTMLAttributes } from "react";
+import { DetailedHTMLProps, SelectHTMLAttributes } from "react";
 import { ColorType, ColorVariant } from "../colors";
 
-interface ITextFieldProps
+interface ISelectFieldProps
   extends DetailedHTMLProps<
-    InputHTMLAttributes<HTMLInputElement>,
-    HTMLInputElement
+    SelectHTMLAttributes<HTMLSelectElement>,
+    HTMLSelectElement
   > {
   color: ColorType;
   variant: ColorVariant;
@@ -13,13 +13,14 @@ interface ITextFieldProps
   label?: string;
 }
 
-const TextField = ({
+const SelectField = ({
   color,
   variant,
   id,
   label,
+  children,
   ...props
-}: ITextFieldProps) => {
+}: ISelectFieldProps) => {
   const className = classNames(
     "w-full border-2 rounded-md p-1 focus:outline-none transition-colors",
     `bg-${color}-${variant}`,
@@ -35,9 +36,11 @@ const TextField = ({
           {label}
         </label>
       )}
-      <input {...props} id={id} className={className} />
+      <select {...props} id={id} className={className}>
+        {children}
+      </select>
     </>
   );
 };
 
-export default TextField;
+export default SelectField;

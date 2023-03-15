@@ -7,9 +7,15 @@ import { CollectionHandler } from "@/util/collectionHandler";
 import { EyeIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { memo, useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getIncomers, Handle, NodeProps, Position } from "reactflow";
+import {
+  getIncomers,
+  getOutgoers,
+  Handle,
+  NodeProps,
+  Position,
+} from "reactflow";
 
-const GroupNode = ({ selected, isConnectable, id, data }: NodeProps) => {
+const GroupNode = ({ selected, isConnectable, id }: NodeProps) => {
   const dispatch = useDispatch();
   const {
     isComponentVisible: isDropdownComponentVisible,
@@ -17,6 +23,7 @@ const GroupNode = ({ selected, isConnectable, id, data }: NodeProps) => {
     setIsComponentVisible: setDropdownIsComponentVisible,
   } = useComponentVisible(false);
   const editor = useSelector((state: RootState) => state.editor);
+  const data = useSelector((state: RootState) => state.data);
   const node = editor.nodes.find((q) => q.id === id);
   const nodeData = useSelector((state: RootState) =>
     state.data.nodes.find((q) => q.id === id)
@@ -32,18 +39,38 @@ const GroupNode = ({ selected, isConnectable, id, data }: NodeProps) => {
   const incomerData = useSelector((state: RootState) =>
     state.data.nodes.find((node) => node.id === incomer?.id)
   );
-  const ref = useRef<HTMLInputElement>(null);
+
+  const updateOutgoers = useCallback(
+    (newNodeData: IDataStateNode) => {
+      const currentNode = editor.nodes.find((q) => q.id === newNodeData.id);
+
+      const outgoers = getOutgoers(currentNode!, editor.nodes, editor.edges);
+
+      if (outgoers && !!outgoers.length) {
+        outgoers.forEach((outgoer) => {
+          const outgoerNodeData = data.nodes.find((q) => q.id === outgoer.id);
+          dispatch(
+            setNodeData({ ...outgoerNodeData!, group: newNodeData.group })
+          );
+
+          updateOutgoers({ ...newNodeData, id: outgoer.id });
+        });
+      }
+    },
+    [data.nodes, dispatch, editor.edges, editor.nodes]
+  );
 
   const resetData = useCallback(() => {
     if (!incomerData) return;
 
-    dispatch(
-      setNodeData({
-        ...incomerData,
-        id,
-      })
-    );
-  }, [dispatch, id, incomerData]);
+    const newNodeData = {
+      ...incomerData,
+      id,
+    };
+
+    dispatch(setNodeData(newNodeData));
+    updateOutgoers(newNodeData);
+  }, [dispatch, id, incomerData, updateOutgoers]);
 
   useLayoutEffect(() => {
     if (!incomerData || !!nodeData) {
@@ -63,10 +90,11 @@ const GroupNode = ({ selected, isConnectable, id, data }: NodeProps) => {
     newNodeData.output = CollectionHandler.group(
       incomerData?.output as any[],
       newNodeData.group,
-      incomerData!.sort
+      newNodeData!.sort
     );
 
     dispatch(setNodeData(newNodeData));
+    updateOutgoers(newNodeData);
   };
 
   const deleteSort = (col: string) => {
@@ -77,10 +105,11 @@ const GroupNode = ({ selected, isConnectable, id, data }: NodeProps) => {
     newNodeData.output = CollectionHandler.group(
       incomerData?.output as any[],
       newNodeData.group,
-      incomerData!.sort
+      newNodeData!.sort
     );
 
     dispatch(setNodeData(newNodeData));
+    updateOutgoers(newNodeData);
   };
 
   return (
@@ -124,31 +153,6 @@ const GroupNode = ({ selected, isConnectable, id, data }: NodeProps) => {
             >
               <EyeIcon className="w-3 h-3" />
             </button>
-            {!!data?.output?.length && (
-              <button
-                onClick={() => {
-                  dispatch(
-                    setNodeData({
-                      output: [],
-                      fileName: undefined,
-                      id,
-                      columns: [],
-                      group: [],
-                      sort: [],
-                    })
-                  );
-
-                  if (!ref.current) {
-                    return;
-                  }
-                  ref.current.value = "";
-                }}
-                type="button"
-                className="text-white border border-slate-500 bg-slate-600 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
-              >
-                <PlusIcon strokeWidth={3} className="w-3 h-3" />
-              </button>
-            )}
             <button
               onClick={() => setDropdownIsComponentVisible(true)}
               type="button"
@@ -163,7 +167,7 @@ const GroupNode = ({ selected, isConnectable, id, data }: NodeProps) => {
               >
                 <ul className="max-h-128 w-64 overflow-auto">
                   {(
-                    incomerData?.columns.filter(
+                    nodeData?.columns.filter(
                       (col) =>
                         !nodeData?.group?.some(
                           (group) => col?.originalName === group
@@ -197,7 +201,10 @@ const GroupNode = ({ selected, isConnectable, id, data }: NodeProps) => {
                 className="text-base text-gray-50"
               >
                 <div className="flex w-full items-center justify-between">
-                  {groupItem}
+                  {
+                    nodeData?.columns.find((q) => q.originalName === groupItem)
+                      ?.newName
+                  }
                   <div className="space-x-2">
                     <button
                       onClick={() => deleteSort(groupItem)}
