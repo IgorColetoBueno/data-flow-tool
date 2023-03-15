@@ -37,25 +37,16 @@ const LineChartNode = ({ selected, isConnectable, id }: NodeProps) => {
   );
 
   const resetData = useCallback(() => {
-    const listOfColumns: string[] = Object.keys(
-      (incomerData?.output as any[])[0]
-    );
-
     const newNodeData: IDataStateNode = {
       ...(incomerData as IDataStateNode),
       id,
-      columns: listOfColumns.map((col) => ({
-        checked: true,
-        originalName: col,
-        newName: col,
-      })),
     };
 
     dispatch(setNodeData(newNodeData));
   }, [dispatch, id, incomerData]);
 
   useLayoutEffect(() => {
-    if (!incomerData || !(incomerData.output as any[]).length || !!nodeData) {
+    if (!incomerData || !incomerData.output || !!nodeData) {
       return;
     }
 
@@ -109,14 +100,16 @@ const LineChartNode = ({ selected, isConnectable, id }: NodeProps) => {
                 <XMarkIcon strokeWidth={3} className="w-3 h-3" />
               </button>
             </div>
-            <Link
-              target="_blank"
-              href={`/home/${editor.boardId}/line-chart/${id}`}
-              type="button"
-              className="text-white border border-sky-500 bg-sky-600 hover:bg-sky-500 focus:ring-4 focus:outline-none focus:ring-sky-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
-            >
-              <EyeIcon className="w-3 h-3" />
-            </Link>
+            {!!nodeData?.xAxisColumn && !!nodeData.yAxisColumn && (
+              <Link
+                target="_blank"
+                href={`/home/${editor.boardId}/line-chart/${id}`}
+                type="button"
+                className="text-white border border-sky-500 bg-sky-600 hover:bg-sky-500 focus:ring-4 focus:outline-none focus:ring-sky-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
+              >
+                <EyeIcon className="w-3 h-3" />
+              </Link>
+            )}
           </div>
         )}
       </div>
@@ -135,6 +128,7 @@ const LineChartNode = ({ selected, isConnectable, id }: NodeProps) => {
                 onChange={handleXAxisChange}
                 value={nodeData.xAxisColumn}
               >
+                <option>Select...</option>
                 {nodeData.columns
                   .filter((q) => q.checked)
                   .map((item) => (
@@ -154,6 +148,7 @@ const LineChartNode = ({ selected, isConnectable, id }: NodeProps) => {
                 onChange={handleYAxisChange}
                 value={nodeData.yAxisColumn}
               >
+                <option>Select...</option>
                 {nodeData.columns
                   .filter((q) => q.checked)
                   .map((item) => (
@@ -166,45 +161,6 @@ const LineChartNode = ({ selected, isConnectable, id }: NodeProps) => {
                   ))}
               </SelectField>
             </div>
-
-            {/* {nodeData.columns.map((item, index) => (
-              <li
-                className="text-base text-gray-50"
-                key={`select-${item.originalName}-${index}-${id}`}
-              >
-                <div className="flex w-full items-center justify-between">
-                  <div className="flex items-center mr-3">
-
-                    {itemToEdit !== index && (
-                      <label
-                        htmlFor={`${item}-${index}`}
-                        className="ml-2 text-sm font-medium text-gray-50"
-                      >
-                        {item.newName}
-                      </label>
-                    )}
-                  </div>
-                  {itemToEdit === index && (
-                    <button
-                      onClick={() => setItemToEdit(-1)}
-                      type="button"
-                      className="text-white border border-teal-600 bg-teal-700 hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-400 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
-                    >
-                      <CheckIcon className="w-3 h-3" />
-                    </button>
-                  )}
-                  {itemToEdit !== index && (
-                    <button
-                      onClick={() => setItemToEdit(index)}
-                      type="button"
-                      className="text-white border border-blue-500 bg-blue-600 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2 text-center mr-2 mb-2"
-                    >
-                      <PencilIcon className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))} */}
           </ul>
         )}
       </div>

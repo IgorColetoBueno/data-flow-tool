@@ -32,7 +32,7 @@ const Sidebar = ({ id }: ISidebarProps) => {
     event.dataTransfer.effectAllowed = "move";
   };
   const boardState = useSelector((state: RootState) => state);
-  const debouncedBoardState = useDebounce<RootState>(boardState, 500);
+  const debouncedBoardState = useDebounce<RootState>(boardState, 700);
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -55,7 +55,6 @@ const Sidebar = ({ id }: ISidebarProps) => {
 
   useEffect(() => {
     if (!!boardName) saveBoard();
-    console.log("salvo");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedBoardState]);
 
@@ -146,7 +145,7 @@ const Sidebar = ({ id }: ISidebarProps) => {
                     className="flex items-center p-2 text-base font-normal text-gray-100 rounded-lg hover:bg-sky-700"
                   >
                     <DocumentArrowUpIcon className="w-6 h-6 text-gray-100 transition duration-75 group-hover:text-gray-100" />
-                    <span className="ml-3">New flow step</span>
+                    <span className="ml-3">New input step</span>
                   </div>
                 </li>
               )}
@@ -234,7 +233,7 @@ const Sidebar = ({ id }: ISidebarProps) => {
                           className="flex items-center p-2 text-base font-normal text-gray-100 rounded-lg hover:bg-sky-700"
                         >
                           <PresentationChartLineIcon className="w-6 h-6 text-gray-100 transition duration-75 group-hover:text-gray-100" />
-                          <span className="ml-3">New chart line</span>
+                          <span className="ml-3">New line chart</span>
                         </div>
                       </li>
                     </ul>

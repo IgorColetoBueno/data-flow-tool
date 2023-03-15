@@ -57,8 +57,6 @@ const LineChart = ({ params: { id, outputId } }: ILineChartProps) => {
         },
       ];
 
-      debugger;
-
       return {
         title: !!key
           ? {
@@ -212,20 +210,20 @@ const LineChart = ({ params: { id, outputId } }: ILineChartProps) => {
     BoardDbHandler.getOne(id).then(setBoard);
   }, [id]);
 
-  if (!dataItems || !options) {
-    return <Loading />;
-  }
+  // if (!dataItems || !options) {
+  return <Loading />;
+  // }
 
   return (
-    <div className="w-full h-full bg-[#5b5c6e] relative">
-      {options.map((option, index) => (
+    <div className="w-full h-full bg-[#333333]">
+      {options!.map((option, index) => (
         <div
           key={`option-${index}`}
           style={{ paddingLeft: "50px", paddingRight: "50px" }}
-          className="w-full overflow-x-auto bg-[#5b5c6e]"
+          className="w-full overflow-x-auto bg-[#333333]"
         >
           <ReactECharts
-            theme="purple-passion"
+            theme="dark"
             style={{ height: "80vh" }}
             option={option}
           />
