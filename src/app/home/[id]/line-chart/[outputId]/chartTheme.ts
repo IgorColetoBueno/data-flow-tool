@@ -85,39 +85,51 @@ export const getRandomColorByIndex = (index?: number): string => {
   return getRandomColorByIndex(index - ECHARTS_COLORS.length);
 };
 
-echarts.registerTheme("purple-passion", {
-  color: ECHARTS_COLORS,
-  backgroundColor: "rgba(91,92,110,1)",
+echarts.registerTheme("dark", {
+  color: [
+    "#dd6b66",
+    "#759aa0",
+    "#e69d87",
+    "#8dc1a9",
+    "#ea7e53",
+    "#eedd78",
+    "#73a373",
+    "#73b9bc",
+    "#7289ab",
+    "#91ca8c",
+    "#f49f42",
+  ],
+  backgroundColor: "rgba(51,51,51,1)",
   textStyle: {},
   title: {
     textStyle: {
-      color: "#ffffff",
+      color: "#eeeeee",
     },
     subtextStyle: {
-      color: "#cccccc",
+      color: "#aaaaaa",
     },
   },
   line: {
     itemStyle: {
-      borderWidth: "2",
+      borderWidth: 1,
     },
     lineStyle: {
-      width: "3",
+      width: 2,
     },
-    symbolSize: "7",
+    symbolSize: 4,
     symbol: "circle",
-    smooth: true,
+    smooth: false,
   },
   radar: {
     itemStyle: {
-      borderWidth: "2",
+      borderWidth: 1,
     },
     lineStyle: {
-      width: "3",
+      width: 2,
     },
-    symbolSize: "7",
+    symbolSize: 4,
     symbol: "circle",
-    smooth: true,
+    smooth: false,
   },
   bar: {
     itemStyle: {
@@ -169,11 +181,11 @@ echarts.registerTheme("purple-passion", {
   },
   candlestick: {
     itemStyle: {
-      color: "#e098c7",
-      color0: "transparent",
-      borderColor: "#e098c7",
-      borderColor0: "#8fd3e8",
-      borderWidth: "2",
+      color: "#fd1050",
+      color0: "#0cf49b",
+      borderColor: "#fd1050",
+      borderColor0: "#0cf49b",
+      borderWidth: 1,
     },
   },
   graph: {
@@ -185,10 +197,22 @@ echarts.registerTheme("purple-passion", {
       width: 1,
       color: "#aaaaaa",
     },
-    symbolSize: "7",
+    symbolSize: 4,
     symbol: "circle",
-    smooth: true,
-    color: ["#9b8bba", "#e098c7", "#8fd3e8", "#71669e", "#cc70af", "#7cb4cc"],
+    smooth: false,
+    color: [
+      "#dd6b66",
+      "#759aa0",
+      "#e69d87",
+      "#8dc1a9",
+      "#ea7e53",
+      "#eedd78",
+      "#73a373",
+      "#73b9bc",
+      "#7289ab",
+      "#91ca8c",
+      "#f49f42",
+    ],
     label: {
       color: "#eeeeee",
     },
@@ -204,12 +228,12 @@ echarts.registerTheme("purple-passion", {
     },
     emphasis: {
       itemStyle: {
-        areaColor: "#e098c7",
+        areaColor: "rgba(255,215,0,0.8)",
         borderColor: "#444",
         borderWidth: 1,
       },
       label: {
-        color: "#ffffff",
+        color: "rgb(100,0,0)",
       },
     },
   },
@@ -224,12 +248,12 @@ echarts.registerTheme("purple-passion", {
     },
     emphasis: {
       itemStyle: {
-        areaColor: "#e098c7",
+        areaColor: "rgba(255,215,0,0.8)",
         borderColor: "#444",
         borderWidth: 1,
       },
       label: {
-        color: "#ffffff",
+        color: "rgb(100,0,0)",
       },
     },
   },
@@ -237,29 +261,29 @@ echarts.registerTheme("purple-passion", {
     axisLine: {
       show: true,
       lineStyle: {
-        color: "#cccccc",
+        color: "#eeeeee",
       },
     },
     axisTick: {
-      show: false,
+      show: true,
       lineStyle: {
-        color: "#333",
+        color: "#eeeeee",
       },
     },
     axisLabel: {
       show: true,
-      color: "#cccccc",
+      color: "#eeeeee",
     },
     splitLine: {
-      show: false,
+      show: true,
       lineStyle: {
-        color: ["#eeeeee", "#333333"],
+        color: ["#aaaaaa"],
       },
     },
     splitArea: {
-      show: true,
+      show: false,
       areaStyle: {
-        color: ["rgba(250,250,250,0.05)", "rgba(200,200,200,0.02)"],
+        color: ["#eeeeee"],
       },
     },
   },
@@ -267,29 +291,29 @@ echarts.registerTheme("purple-passion", {
     axisLine: {
       show: true,
       lineStyle: {
-        color: "#cccccc",
+        color: "#eeeeee",
       },
     },
     axisTick: {
-      show: false,
+      show: true,
       lineStyle: {
-        color: "#333",
+        color: "#eeeeee",
       },
     },
     axisLabel: {
       show: true,
-      color: "#cccccc",
+      color: "#eeeeee",
     },
     splitLine: {
-      show: false,
+      show: true,
       lineStyle: {
-        color: ["#eeeeee", "#333333"],
+        color: ["#aaaaaa"],
       },
     },
     splitArea: {
-      show: true,
+      show: false,
       areaStyle: {
-        color: ["rgba(250,250,250,0.05)", "rgba(200,200,200,0.02)"],
+        color: ["#eeeeee"],
       },
     },
   },
@@ -297,29 +321,29 @@ echarts.registerTheme("purple-passion", {
     axisLine: {
       show: true,
       lineStyle: {
-        color: "#cccccc",
+        color: "#eeeeee",
       },
     },
     axisTick: {
-      show: false,
+      show: true,
       lineStyle: {
-        color: "#333",
+        color: "#eeeeee",
       },
     },
     axisLabel: {
       show: true,
-      color: "#cccccc",
+      color: "#eeeeee",
     },
     splitLine: {
-      show: false,
+      show: true,
       lineStyle: {
-        color: ["#eeeeee", "#333333"],
+        color: ["#aaaaaa"],
       },
     },
     splitArea: {
-      show: true,
+      show: false,
       areaStyle: {
-        color: ["rgba(250,250,250,0.05)", "rgba(200,200,200,0.02)"],
+        color: ["#eeeeee"],
       },
     },
   },
@@ -327,29 +351,29 @@ echarts.registerTheme("purple-passion", {
     axisLine: {
       show: true,
       lineStyle: {
-        color: "#cccccc",
+        color: "#eeeeee",
       },
     },
     axisTick: {
-      show: false,
+      show: true,
       lineStyle: {
-        color: "#333",
+        color: "#eeeeee",
       },
     },
     axisLabel: {
       show: true,
-      color: "#cccccc",
+      color: "#eeeeee",
     },
     splitLine: {
-      show: false,
+      show: true,
       lineStyle: {
-        color: ["#eeeeee", "#333333"],
+        color: ["#aaaaaa"],
       },
     },
     splitArea: {
-      show: true,
+      show: false,
       areaStyle: {
-        color: ["rgba(250,250,250,0.05)", "rgba(200,200,200,0.02)"],
+        color: ["#eeeeee"],
       },
     },
   },
@@ -365,67 +389,67 @@ echarts.registerTheme("purple-passion", {
   },
   legend: {
     textStyle: {
-      color: "#cccccc",
+      color: "#eeeeee",
     },
   },
   tooltip: {
     axisPointer: {
       lineStyle: {
-        color: "#cccccc",
-        width: 1,
+        color: "#eeeeee",
+        width: "1",
       },
       crossStyle: {
-        color: "#cccccc",
-        width: 1,
+        color: "#eeeeee",
+        width: "1",
       },
     },
   },
   timeline: {
     lineStyle: {
-      color: "#8fd3e8",
+      color: "#eeeeee",
       width: 1,
     },
     itemStyle: {
-      color: "#8fd3e8",
+      color: "#dd6b66",
       borderWidth: 1,
     },
     controlStyle: {
-      color: "#8fd3e8",
-      borderColor: "#8fd3e8",
+      color: "#eeeeee",
+      borderColor: "#eeeeee",
       borderWidth: 0.5,
     },
     checkpointStyle: {
-      color: "#8fd3e8",
-      borderColor: "#8a7ca8",
+      color: "#e43c59",
+      borderColor: "#c23531",
     },
     label: {
-      color: "#8fd3e8",
+      color: "#eeeeee",
     },
     emphasis: {
       itemStyle: {
-        color: "#8fd3e8",
+        color: "#a9334c",
       },
       controlStyle: {
-        color: "#8fd3e8",
-        borderColor: "#8fd3e8",
+        color: "#eeeeee",
+        borderColor: "#eeeeee",
         borderWidth: 0.5,
       },
       label: {
-        color: "#8fd3e8",
+        color: "#eeeeee",
       },
     },
   },
   visualMap: {
-    color: ["#8a7ca8", "#e098c7", "#cceffa"],
+    color: ["#bf444c", "#d88273", "#f6efa6"],
   },
   dataZoom: {
-    backgroundColor: "rgba(0,0,0,0)",
+    backgroundColor: "rgba(47,69,84,0)",
     dataBackgroundColor: "rgba(255,255,255,0.3)",
     fillerColor: "rgba(167,183,204,0.4)",
     handleColor: "#a7b7cc",
     handleSize: "100%",
     textStyle: {
-      color: "#333",
+      color: "#eeeeee",
     },
   },
   markPoint: {
