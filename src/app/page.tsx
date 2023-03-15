@@ -4,14 +4,12 @@ import { EXTERNAL_KEY_BOARD_FROM_EDITOR } from "@/storage";
 import { BoardDbHandler, IBoard } from "@/storage/boardDbHandler";
 import { DataDbHandler } from "@/storage/dataDbHandler";
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import classNames from "classnames";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { generateUUID } from "three/src/math/MathUtils";
 import RINGS from "vanta/dist/vanta.rings.min.js";
-import styles from "./page.module.css";
 
 const Home = () => {
   const vantaRef = useRef<any>(null);
@@ -68,7 +66,10 @@ const Home = () => {
   };
 
   return (
-    <div ref={vantaRef} className={styles.container}>
+    <div
+      ref={vantaRef}
+      className="flex justify-center items-center h-full w-full"
+    >
       <div className="shadow-md bg-gray-light">
         <div
           className={
